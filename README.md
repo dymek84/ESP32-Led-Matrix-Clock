@@ -5,7 +5,8 @@ A led matrix clock ran on an ESP32 using FastLED and a led matrix
 Based on the LED projects by Bitluni (https://bitluni.net) I got excited to use WS2812 (or alike) LED's to create something fun.
 After creating my LED Pingpong Ball light I wanted something else. So I stumbled on the LED clock video https://www.youtube.com/watch?v=7urN2OS0fjs by Thomas https://www.instructables.com/Ping-Pong-Ball-LED-Clock/ and https://www.hackster.io/news/improved-led-ping-pong-ball-clock-232a0ac06643
 I loved these creations. But... (always a but), this is a BIG clock, a bit too much for my livingroom. Also these clocks run on an arduino and I wanted to use an ESP32.
-# Why an ESP32? (In this project I used: Wemos Mini D1 EPS32). https://www.amazon.nl/ESP-32S-Wireless-Bluetooth-Esp8266-CP2102/dp/B07NW8S1ZR
+# Why an ESP32? 
+(In this project I used: Wemos Mini D1 EPS32). https://www.amazon.nl/ESP-32S-Wireless-Bluetooth-Esp8266-CP2102/dp/B07NW8S1ZR
 Because it has built-in WIFI, Bluetooth, DualCore, RTC and much much more. Oh, and a lot of program memory.
 
 # Leds (WS2812 8x32 LED matrix)
