@@ -1,3 +1,5 @@
+<img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/IMG_6880.jpeg?raw=true" width="400">
+
 # ESP32-Led-Matrix-Clock
 A led matrix clock ran on an ESP32 using FastLED and a led matrix
 
@@ -12,11 +14,15 @@ Because it has built-in WIFI, Bluetooth, DualCore, RTC and much much more. Oh, a
 # Leds (WS2812 8x32 LED matrix)
 Also, I was looking into alternatives to ping-pong balls and LED-strips with smaller LED spacings. The ones used in the projects above are all 30 LEDS per meter. Luckely there are also LED strips with 60 and 144 LED's per meter. Downside, the pingpong balls wont fit. And while searching for these strips my eye caught an alternative, a WS2812 LED MATRIX, available in the sizes 8x8 (too small for this project, unless you buy 4), 16x16 (yes nice) and an 8x32 (great!!) version. I bought the latter. I bought mine at (https://www.tinytronics.nl/shop/en/lighting/led-digital/ws2812b-digitale-5050-rgb-led-matrix-32x8-flexible) but you can get it a lot cheaper on one of the chinese stores.  Please note. This project doesn't depend on using this specific matrix. You can create your own, or buy for example 4 8x8 LED matrices and even any other addressable LED can be used, as long as it is supported by the FastLED library (http://fastled.io).
 
+<img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/IMG_6789.jpeg?raw=true" width="250">
+
 # 3D printer files, equipment and settings.
 As ping pong balls don't fit and as I also just bought a 3D printer, I really wanted to make use of that. A crash course in fusion 360 design, I created a enclosure for the matrix and ESP32. It looks great. The Fusion 360 files (or printable obj files) will be shared here as well. For you to use and change in anyway you like. Please know, I'm not a fusion 360 specialist, by far, so non parametric, ugly sketches and a lot of .. how did I do this moments, went into designing. 
 The enclosure was printed using Black PLA and the LED diffusor using Neutral (almost transparent) PLA. (neutral: https://www.123-3d.nl/PLA/1-75-mm-PLA/Neutraal-p7318.html, black: https://www.123-3d.nl/PLA/1-75-mm-PLA/Zwart-p7316.html).  
 Everything was printed on a Creality Ender 3v2: https://www.123-3d.nl/3D-printers/Creality-3D-Ender-3-V2-p16058.html accomodated with a BL-touch. (Using the superb modded Marlin firmware provided by Smith3D : https://smith3d.com/ender-3-v2-bltouch-firmware-installation-guide-by-smith3d-com/)
-All fusion 360 files were sliced using CURA 4.7.  As the enclosure is a little bit bigger then the printbed (32 cm vs 22.5 cm) I designed it such that it is printed in 2 pieces and glued together afterwards. The same for the diffusor. Everything was printed at standard quality (0.4 nozzle and 0.2 layer height) except for the stands, these were printed at 0.28 layer height, which didn't affect the quality because of their simplicity.
+All fusion 360 files were sliced using CURA 4.7.  As the enclosure is a little bit bigger then the printbed (32 cm vs 22.5 cm) I designed it such that it is printed in 2 pieces and glued together afterwards. The same for the diffusor. Everything was printed at standard quality (0.4 nozzle and 0.2 layer height) except for the stands, these were printed at 0.28 layer height, which didn't affect the quality because of their simplicity. 
+
+<img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/IMG_6873.jpeg?raw=true" width="250">
 
 # Coding and stuff
 First of all, I'm not a software engineer. I did a lot of programming in the past, mostly in [R], Java, PHP and Perl. I'm a bioinformatician, who does mostly do biological data analysis using scripts and a bit of ugly code. Don't expect a neatly programmed project. I tied to put comments in the code and splitted the Arduino.ino files into seperate files, each with their own 'focus'. So no libraries, in the end, the arduino environment will concatenate all files into one big file and compile it. 
