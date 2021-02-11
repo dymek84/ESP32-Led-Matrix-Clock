@@ -80,7 +80,16 @@ There are so many things I want to do. But for now this is my action list.
 - Characters can now only be placed based on X position, not Y position yet.
 - Add photo's to this page
 
-Have fun....
+# Wires and schema's
+<img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/ESP-schema.png?raw=true" width="400">
+In the (bad) photo you see how I soldered everyting on a soldering breadboard. (5cm x 7 cm). 
+The ESP32, I soldered on some pins on the ground, Pin2 and 5V. and on the other side a pin on the top and bottom of the outer rows.
+On the soldering breadbord I soldered the connectors. This makes the ESP32 plug and play in case you want to add, change stuff.
+I jused JST XH connectors to allow easy plugin and removal of the connections to the powersupply and the matrix.
+Under the ESP, I soldered the 62 Ohm resistor, this makes the data signal cleaner. I used https://github.com/Aircoookie/WLED/wiki this schema as reference.
+Also a 1000uF capacitor (rated for 5V-12V and 50Watt) was used to catch possible power fluctuations. This can happen when some funcions, or effects on the matrix draw for a short time more power. This prevent so called Brownouts on the ESP32, causing it to reboot.
+With 256 LED's each consuming a max of 40mAmps (fully on white), you need 10 Amps at 5V (50Watt). In the code I limited to 3 Amps. This seems to be sufficient for what this clock does. It is still bright and works like a charm.
+Use powerinjection.. so not feed the Leds via the ESP, but just like I do in this schema. The Matrix that I have has 3 connectors, I power inject over every connector, to prevent voltage drops and hence bad color representation.
 
 
 
