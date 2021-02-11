@@ -308,9 +308,9 @@ void nachtmode() {
   // Serial.println("good night..");
   CRGB ledcol = timeColor;
   //while (nightMode) {
-    timeColor = CHSV(0, 255, 32);
-    oneColorBackground(CRGB::Black, 250);
-    FastLED.delay(1000);
+  timeColor = CHSV(0, 255, 32);
+  oneColorBackground(CRGB::Black, 250);
+  FastLED.delay(1000);
   //  if (breakAnimation) {
   //    breakAnimation = false;
   //    break;
@@ -329,41 +329,41 @@ void runRandomAnimation(int every) {
   second = timeinfo.tm_sec; // get the seconds
   int minStart = minute;
   //Serial.print("minute ="); Serial.println(minute);
-  
+
   if (every == 60) {
     if (minute == 0) {
-     // Serial.println("Random animation starting every hour");
+      // Serial.println("Random animation starting every hour");
       runAnimation = true;
     } else {
       runAnimation = false;
     }
   } else if (every == 30) {
     if (minute == 0 || minute == 30) {
-     //  Serial.println("Random animation starting every 30 minutes");
+      //  Serial.println("Random animation starting every 30 minutes");
       runAnimation = true;
     } else {
       runAnimation = false;
     }
   } else if (every == 15) {
-     //Serial.println("Random animation starting evry 15 minutes");
+    //Serial.println("Random animation starting evry 15 minutes");
     if (minute == 0 || minute == 15 || minute == 30 || minute == 45) {
       runAnimation = true;
     } else {
       runAnimation = false;
     }
-  }else{
+  } else {
     runAnimation = false;
   }
 
- 
-  int randomNumber = rand() % 7 + 1;
+
+  int randomNumber = rand() % 11 + 1;
   while (runAnimation) {
     if (randomNumber == 1) {
       Serial.println("showing: Rainbow");
       rainbowCycle(20);
     }
     else if (randomNumber == 2) {
-       Serial.println("showing: Sparkle");
+      Serial.println("showing: Sparkle");
       Sparkle(0xff, 0xff, 0xff, 0);
     }
     else if (randomNumber == 3) {
@@ -396,17 +396,61 @@ void runRandomAnimation(int every) {
       meteorRain(0xff, 0xff, 0xff, 10, 64, true, 30);
     }
     else if (randomNumber == 8) {
-      Serial.println("showing: Bouncing balls");
-      byte colors[3][3] = { {0xff, 0, 0},
-        {0xff, 0xff, 0xff},
-        {0   , 0   , 0xff}
-      };
-      BouncingColoredBalls(3, colors);
+      Serial.println("showing: Confetti");
+      ChangeMe();
+      EVERY_N_MILLISECONDS(thisdelay) {   // FastLED based non-blocking delay to update/display the sequence.
+        confetti();
+      }
+      showStrip();
     }
-    
+    else if (randomNumber == 9) {
+      Serial.println("showing: Plasma");
+      EVERY_N_MILLISECONDS(50) {                                  // FastLED based non-blocking delay to update/display the sequence.
+        plasma();
+      }
+      EVERY_N_SECONDS(5) {                                 // Change the target palette to a random one every 5 seconds.
+        uint8_t baseC = random8();                         // You can use this as a baseline colour if you want similar hues in the next line.
+        targetPalette = CRGBPalette16(CHSV(baseC + random8(32), 192, random8(128, 255)), CHSV(baseC + random8(32), 255, random8(128, 255)), CHSV(baseC + random8(32), 192, random8(128, 255)), CHSV(baseC + random8(32), 255, random8(128, 255)));
+      }
+      showStrip();
+    }
+    else if (randomNumber == 10) {
+      currentPalette = OceanColors_p;                                   // Use palettes instead of direct CHSV or CRGB assignments
+      targetPalette = OceanColors_p;                                    // Also support smooth palette transitioning
+
+      EVERY_N_MILLISECONDS(50) {                                                      // Smooth palette transitioning runs continuously.
+        uint8_t maxChanges = 24;
+        nblendPaletteTowardPalette(currentPalette, targetPalette, maxChanges);
+      }
+
+      EVERY_N_SECONDS(5) {
+        SetupMySimilar4Palette();                                                     // Change palette colours every 5 seconds.
+      }
+
+      EVERY_N_MILLIS(50) {                                                            // Sets the original delay time.
+        rippless();                                                                   // Run the ripple routine.
+      }
+      showStrip();
+    }
+    else if (randomNumber == 11) {
+      currentPalette = RainbowColors_p;
+      beatwave();
+
+      EVERY_N_MILLISECONDS(100) {
+        uint8_t maxChanges = 24;
+        nblendPaletteTowardPalette(currentPalette, targetPalette, maxChanges);   // AWESOME palette blending capability.
+      }
+
+      EVERY_N_SECONDS(5) {                                        // Change the target palette to a random one every 5 seconds.
+        targetPalette = CRGBPalette16(CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 192, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)));
+      }
+
+      showStrip();
+    }
+
     if (minute == 0 || minute == 15 || minute == 30 || minute == 45) {
-      
-    }else{
+
+    } else {
       Serial.println("End random animation");
       runAnimation = false;
     }
@@ -442,3 +486,87 @@ void fadeToBlack(int ledNo, byte fadeValue) {
 }
 
 // EFFECTS ARE TAKEN FROM https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#FastLEDFramework
+
+// The next fx come from https://github.com/atuline/FastLED-Demos/blob/master/confetti/confetti.ino
+void confetti() {                                             // random colored speckles that blink in and fade smoothly
+  fadeToBlackBy(leds, NUM_LEDS, thisfade);                    // Low values = slower fade.
+  int pos = random16(NUM_LEDS);                               // Pick an LED at random.
+  leds[pos] += CHSV((thishue + random16(huediff)) / 4 , thissat, thisbri); // I use 12 bits for hue so that the hue increment isn't too quick.
+  thishue = thishue + thisinc;                                // It increments here.
+} // confetti()
+
+void ChangeMe() {                                             // A time (rather than loop) based demo sequencer. This gives us full control over the length of each sequence.
+  uint8_t secondHand = (millis() / 1000) % 15;                // IMPORTANT!!! Change '15' to a different value to change duration of the loop.
+  static uint8_t lastSecond = 99;                             // Static variable, means it's only defined once. This is our 'debounce' variable.
+  if (lastSecond != secondHand) {                             // Debounce to make sure we're not repeating an assignment.
+    lastSecond = secondHand;
+    switch (secondHand) {
+      case  0: thisinc = 1; thishue = 192; thissat = 255; thisfade = 2; huediff = 256; break; // You can change values here, one at a time , or altogether.
+      case  5: thisinc = 2; thishue = 128; thisfade = 8; huediff = 64; break;
+      case 10: thisinc = 1; thishue = random16(255); thisfade = 1; huediff = 16; break; // Only gets called once, and not continuously for the next several seconds. Therefore, no rainbows.
+      case 15: break;                                                                // Here's the matching 15 for the other one.
+    }
+  }
+} // ChangeMe() for confetti
+
+void plasma() {                                                 // This is the heart of this program. Sure is short. . . and fast.
+
+  int thisPhase = beatsin8(6, -64, 64);                         // Setting phase change for a couple of waves.
+  int thatPhase = beatsin8(7, -64, 64);
+
+  for (int k = 0; k < NUM_LEDS; k++) {                          // For each of the LED's in the strand, set a brightness based on a wave as follows:
+
+    int colorIndex = cubicwave8((k * 23) + thisPhase) / 2 + cos8((k * 15) + thatPhase) / 2; // Create a wave and add a phase change and add another wave with its own phase change.. Hey, you can even change the frequencies if you wish.
+    int thisBright = qsuba(colorIndex, beatsin8(7, 0, 96));                               // qsub gives it a bit of 'black' dead space by setting sets a minimum value. If colorIndex < current value of beatsin8(), then bright = 0. Otherwise, bright = colorIndex..
+
+    leds[k] = ColorFromPalette(currentPalette, colorIndex, thisBright, currentBlending);  // Let's now add the foreground colour.
+  }
+
+}
+
+void rippless() {
+
+  for (int i = 0; i < maxRipples; i += 2) {                                       // Check to see if ripple has expired, and if so, create a new one.
+    if (random8() > 224 && !ripples[i].exist) {                                   // Randomly create a new ripple if this one has expired.
+      ripples[i].Init(192, 10);                                                   // Initialize the ripple array with Fade and MaxLife values.
+      ripples[i + 1] = ripples[i];                                                // Everything except velocity is the same for the ripple's other half. Position starts out the same for both halves.
+      ripples[i + 1].velocity *= -1;                                              // We want the other half of the ripple to go opposite direction.
+    }
+  }
+
+  for (int i = 0; i < maxRipples; i++) {                                          // Move the ripple if it exists
+    if (ripples[i].exist) {
+      leds[ripples[i].pos] = ColorFromPalette(currentPalette, ripples[i].color, ripples[i].brightness, LINEARBLEND);
+      ripples[i].Move();
+    }
+  }
+
+  fadeToBlackBy(leds, NUM_LEDS, 160);
+
+} // rippless()
+
+
+
+void SetupMySimilar4Palette() {                                                   // Create a palette with colours close to each other.
+
+  uint8_t thishue = random8();
+
+  targetPalette = CRGBPalette16(CHSV(thishue + random8(32), 255, random8(128, 255)),
+                                CHSV(thishue + random8(32), 255, random8(192, 255)),
+                                CHSV(thishue + random8(32), 192, random8(192, 255)),
+                                CHSV(thishue + random8(32), 255, random8(128, 255)));
+
+} // SetupMySimilar4Palette()
+
+void beatwave() {
+
+  uint8_t wave1 = beatsin8(9, 0, 255);                        // That's the same as beatsin8(9);
+  uint8_t wave2 = beatsin8(8, 0, 255);
+  uint8_t wave3 = beatsin8(7, 0, 255);
+  uint8_t wave4 = beatsin8(6, 0, 255);
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = ColorFromPalette( currentPalette, i + wave1 + wave2 + wave3 + wave4, 255, currentBlending);
+  }
+
+} // beatwave()
