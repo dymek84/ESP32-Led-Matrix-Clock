@@ -63,7 +63,7 @@ Sometimes the NTP server doesn't respond. The ESP32 will try 5 times (~15-20 sec
 5. If network time is configured the time will be shown on the matrix. 
 6. Now you can surf to the ESP's ip address and play with the configuration, change animations, LED colors, set a night mode, or choose for a random animation to be shown at specific intervalls. 
 
-#Work in progress: 
+# Work in progress: 
 There are so many things I want to do. But for now this is my action list.
 
 - DONE: Configure colors background and letters.
@@ -74,11 +74,11 @@ There are so many things I want to do. But for now this is my action list.
 - DONE: Nightmode with red letters (dim) and no background. 
 - DONE: Sleep and wakeup times for nightmode.. (limited to specific times for now)
 - Option to globally dim the display
-- More animation
+- ONGOIN: More animation
 - DONE: Access Point mode to configure WIFI 
 - DONE: Show IP address on bootup
 - Characters can now only be placed based on X position, not Y position yet.
-- Add photo's to this page
+- DONE: Add photo's to this page
 
 # Wires and schema's
 <img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/ESP-schema.png?raw=true" width="400">
