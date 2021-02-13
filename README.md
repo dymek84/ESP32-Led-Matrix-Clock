@@ -73,7 +73,7 @@ There are so many things I want to do. But for now this is my action list.
 - DONE: Animation interrupt as some animations will run a long time preventing switching of animations
 - DONE: Nightmode with red letters (dim) and no background. 
 - DONE: Sleep and wakeup times for nightmode.. (limited to specific times for now)
-- Option to globally dim the display
+- DONE: Option to globally dim the display, and seperate dimming options for characters and background.
 - ONGOIN: More animation
 - DONE: Access Point mode to configure WIFI 
 - DONE: Show IP address on bootup
