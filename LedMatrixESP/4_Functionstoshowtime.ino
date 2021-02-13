@@ -106,13 +106,9 @@ void updateLocalTime()
     FastLED.delay(3000);
     retryCounter++;
     if (retryCounter > 5){
-      Serial.println("No time server.. damn we need to reboot");
+      Serial.println("No time server..let us reboot");
       ESP.restart();
     }
   }
-  // yes we have time..
-  //leds[16] = CRGB::Green;
-  //FastLED.show();
- // FastLED.delay(200);
   // Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }

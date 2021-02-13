@@ -84,9 +84,9 @@ TBlendType    currentBlending = LINEARBLEND;
 
 uint8_t hue = 0;
 uint8_t mhue = 171;
-uint8_t backgroundBrightness = 128;
-uint8_t digitBrightness = 255;
-uint8_t overAllBrightness = 255;
+uint8_t backgroundBrightness = 128; //not start full on but at 50%
+uint8_t digitBrightness = 128; //not start full on but at 50%
+uint8_t overAllBrightness = 128; //not start full on but at 50%, this prevents a brownout by drawinf too much current.
 boolean nightMode = false;
 int nightTimeHour = 22;
 int nightTimeMinute = 00;
@@ -136,7 +136,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   </script></head><body>
   <form action="/get" target="hidden-form">
     Kies je effect: nu %inputString% <br />
-      <select name="inputString" id="effecten">
+      <select name="inputString" id="effecten" onchange="this.form.submit()">
       <option value="%inputString%" selected> %inputString% </option>
         <option value="oneColorBackground">Fixed Background </option>
         <option value="randomEveryHour">Random ieder uur </option>
@@ -155,17 +155,15 @@ const char index_html[] PROGMEM = R"rawliteral(
             <option value = "ripples">ripples</option>
             <option value = "raibowWaves">Regenboog golven</option>
       </select>
-    <input type="submit" value="Submit" onclick="submitMessage()">
   </form><br />
   
   <form action="/get" target="hidden-form">
     Klok cijfers aan/uit:  <br />
-    <select name="inputInt" id="%inputInt%">
+    <select name="inputInt" id="%inputInt%" onchange="this.form.submit()">
     <option value="%inputInt%" selected> %inputInt% </option>
     <option value="1">Aan (1)</option>
     <option value="0">Uit (0)</option>
     </select>
-    <input type="submit" value="Submit" onclick="submitMessage()">
   </form><br />
   
   <form action="/get" target="hidden-form">
@@ -180,19 +178,51 @@ const char index_html[] PROGMEM = R"rawliteral(
     <input type="submit" value="Submit" onclick="submitMessage()">
    </form><br />
 
+    <form action="/get" target="hidden-form">
+    <label for="helderheid" name="overAllBrightness">Pas de helderheid van de hele matrix aan </label> <br />
+    <select name="overAllBrightness" id="overAllBrightness" onchange="this.form.submit()">
+      <option value="%overAllBrightness%" selected> %overAllBrightness% </option>
+        <option value="100">100 </option>
+        <option value="50">50 </option>
+        <option value="25">25 </option>
+    </select>
+    </form>
+
+ <form action="/get" target="hidden-form">
+    <label for="achergrondhelderheid" name="backgroundBrightness" >Pas de helderheid van de achtergrond aan </label> <br />
+    <select name="backgroundBrightness" id="backgroundBrightness" onchange="this.form.submit()">
+      <option value="%backgroundBrightness%" selected> %backgroundBrightness% </option>
+        <option value="100">100 </option>
+        <option value="50">50 </option>
+        <option value="25">25 </option>
+        <option value="12">12 </option>
+    </select>
+    </form>
+
+     <form action="/get" target="hidden-form">
+    <label for="cijfershelderheid" name="digitBrightness">Pas de helderheid van de cijfers aan </label> <br />
+    <select name="digitBrightness" id="digitBrightness"  onchange="this.form.submit()">
+      <option value="%digitBrightness%" selected> %digitBrightness% </option>
+        <option value="100">100 </option>
+        <option value="50">50 </option>
+        <option value="25">25 </option>
+        <option value="12">12 </option>
+    </select>
+    </form>
+   
    <form action="/get" target="hidden-form">
-   Nachtstand gebruiken? Dit zet nachtmode handmatig aan<br />
-    <select name="nightMode" id="nachtstand">
+   Handmatige Nachtstand:<br />
+    <select name="nightMode" id="nachtstand" onchange="this.form.submit()">
       <option value="%nightMode%" selected> %nightMode% </option>
         <option value="Ja">Ja </option>
         <option value="Nee">Nee </option>
     </select>
-    <input type="submit" value="Submit" onclick="submitMessage()">
     </form>
 <br />
+De nachtstand kan ook automatisch aan en uitgezet worden, kies een begin tijd en een eindtijd.
 <form action="/get" target="hidden-form">
    Nachtstand starten om: (uur) <br />
-    <select name="nightTimeHour" id="nightTimeHour">
+    <select name="nightTimeHour" id="nightTimeHour" onchange="this.form.submit()">
       <option value="%nightTimeHour%" selected> %nightTimeHour% </option>
         <option value="19">19</option>
         <option value="20">20</option>
@@ -200,11 +230,10 @@ const char index_html[] PROGMEM = R"rawliteral(
         <option value="22">22</option>
         <option value="23">23</option>  
     </select>
-    <input type="submit" value="Submit" onclick="submitMessage()">
      </form>
     <form action="/get" target="hidden-form">
    Nachtstand starten minuut: 
-    <select name="nightTimeMinute" id="nightTimeMinute">
+    <select name="nightTimeMinute" id="nightTimeMinute" onchange="this.form.submit()">
       <option value="%nightTimeMinute%" selected> %nightTimeMinute% </option>
         <option value="0">0</option>
         <option value="5">5</option>
@@ -219,11 +248,10 @@ const char index_html[] PROGMEM = R"rawliteral(
         <option value="50">50</option> 
         <option value="55">55</option>  
     </select>
-    <input type="submit" value="Submit" onclick="submitMessage()">
     </form>
    <form action="/get" target="hidden-form">
    Nachtstand STOPPEN om: (uur) <br />
-    <select name="morningTimeHour" id="morningTimeHour">
+    <select name="morningTimeHour" id="morningTimeHour" onchange="this.form.submit()">
       <option value="%morningTimeHour%" selected> %morningTimeHour% </option>
         <option value="5">5</option>
         <option value="6">6</option>
@@ -234,11 +262,10 @@ const char index_html[] PROGMEM = R"rawliteral(
         <option value="11">11</option>
             
     </select>
-    <input type="submit" value="Submit" onclick="submitMessage()">
      </form>
     <form action="/get" target="hidden-form">
    Nachtstand STOPPEN minuut: 
-    <select name="morningTimeMinute" id="morningTimeMinute">
+    <select name="morningTimeMinute" id="morningTimeMinute" onchange="this.form.submit()">
       <option value="%morningTimeMinute%" selected> %morningTimeMinute% </option>
         <option value="0">0</option>
         <option value="5">5</option>
@@ -253,9 +280,8 @@ const char index_html[] PROGMEM = R"rawliteral(
         <option value="50">50</option> 
         <option value="55">55</option>  
     </select>
-    <input type="submit" value="Submit" onclick="submitMessage()">
      </form>
-     <br />Tussen %nightTimeHour%:%nightTimeMinute% en %morningTimeHour%:%morningTimeMinute% <br />
+     <br />Tussen %nightTimeHour%:%nightTimeMinute% in de avond en %morningTimeHour%:%morningTimeMinute%  in de ochtend<br />
      zal de klok in nacht-stand staan. <br />
     <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";
@@ -304,6 +330,9 @@ const char* PARAM_NIGHTHOUR = "nightTimeHour";
 const char* PARAM_NIGHTMIN = "nightTimeMinute";
 const char* PARAM_MORNINGHOUR = "morningTimeHour";
 const char* PARAM_MORNINGMINUTE = "morningTimeMinute";
+const char* PARAM_OVERALLBRIGHTNESS = "overAllBrightness";
+const char* PARAM_BGBRIGHTNESS = "backgroundBrightness";
+const char* PARAM_DIGITBRIGHTNESS = "digitBrightness";
 
 
 // end stuff for webserver
@@ -446,7 +475,7 @@ int numberMatrix[10][64] =
 */
 int ledMatrix[YRES][XRES]; // is used to make an x.y coordinate map of led numbers
 boolean EveningSleep = false;
-
+boolean Nachtlamp;
 
 /* some strucs for animation */
 struct ripple {                                                                 // Reko Meriö's structures
@@ -587,7 +616,7 @@ void loop() {
   /* nightMode can be switched on manually
       but also set for a start and end time (hours and minutes)
   */
-  boolean Nachtlamp;
+  
 
   if (timeinfo.tm_hour > 12 && timeinfo.tm_hour <= 23 && timeinfo.tm_hour >= nightTimeHour && timeinfo.tm_min >= nightTimeMinute ) { // it is evening, and the NightLamp time is passed.
     EveningSleep = true;
@@ -618,7 +647,7 @@ void loop() {
     String whichFX = currentAnimation;
     if (whichFX == "oneColorBackground") {
       // setAll(0, 0, 0);
-      oneColorBackground(backgroundColor, 128);
+      oneColorBackground(backgroundColor, backgroundBrightness);
     } else if (whichFX == "rainbowCycle") {
       rainbowCycle(20);
     } else if (whichFX == "sparkle") {
@@ -706,7 +735,7 @@ void loop() {
     } else {
       // we can use this place to also test new animation :)
       setAll(0, 0, 0);
-      oneColorBackground(CHSV(10, 255, 64), 128);
+      oneColorBackground(CHSV(10, 255, 64), backgroundBrightness);
     }
   }
 }

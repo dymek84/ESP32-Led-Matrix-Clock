@@ -20,6 +20,11 @@ void Task1code( void * parameter) {
     request->send_P(200, "text/html", index_html, processor);
   });
 
+  /**
+     Below all parameters that are send via the webserver are 'caught' and stored in SPIFFS memory
+     Dont forger to also add the corresponding variables in the processor() functions as this function
+     is required to find and replace the variables into the HTML page.
+  */
   // Send a GET request to <ESP_IP>/get?inputString=<inputMessage>
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request) {
     String inputMessage;
@@ -74,6 +79,24 @@ void Task1code( void * parameter) {
       writeFile(SPIFFS, "/morningTimeMinute.txt", inputMessage.c_str());
       morningTimeMinute = readFile(SPIFFS, "/morningTimeMinute.txt").toInt(); //store globally
     }
+    else if (
+      request->hasParam(PARAM_OVERALLBRIGHTNESS)) {
+      inputMessage = request->getParam(PARAM_OVERALLBRIGHTNESS)->value();
+      writeFile(SPIFFS, "/overAllBrightness.txt", inputMessage.c_str());
+      morningTimeMinute = readFile(SPIFFS, "/overAllBrightness.txt").toInt(); //store globally
+    }
+    else if (
+      request->hasParam(PARAM_BGBRIGHTNESS)) {
+      inputMessage = request->getParam(PARAM_BGBRIGHTNESS)->value();
+      writeFile(SPIFFS, "/backgroundBrightness.txt", inputMessage.c_str());
+      morningTimeMinute = readFile(SPIFFS, "/backgroundBrightness.txt").toInt(); //store globally
+    }
+    else if (
+      request->hasParam(PARAM_DIGITBRIGHTNESS)) {
+      inputMessage = request->getParam(PARAM_DIGITBRIGHTNESS)->value();
+      writeFile(SPIFFS, "/digitBrightness.txt", inputMessage.c_str());
+      morningTimeMinute = readFile(SPIFFS, "/digitBrightness.txt").toInt(); //store globally
+    }
     else
     {
       inputMessage = "No message sent";
@@ -85,19 +108,57 @@ void Task1code( void * parameter) {
   server.begin();
 
 
+
   // the part below can be seen as LOOP() from the main.. but now on processor 2
   for (;;) {
+    EVERY_N_SECONDS(10) {
+      nightTimeHour = readFile(SPIFFS, "/nightTimeHour.txt").toInt();
+      nightTimeMinute = readFile(SPIFFS, "/nightTimeMinute.txt").toInt();
+      morningTimeHour = readFile(SPIFFS, "/morningTimeHour.txt").toInt();
+      morningTimeMinute = readFile(SPIFFS, "/morningTimeMinute.txt").toInt();
+      overAllBrightness = readFile(SPIFFS, "/overAllBrightness.txt").toInt();
+      if (overAllBrightness == 100) {
+        overAllBrightness = 255;
+      } else if (overAllBrightness == 50) {
+        overAllBrightness = 128;
+      } else {
+        overAllBrightness = 64;
+      }
+      backgroundBrightness = readFile(SPIFFS, "/backgroundBrightness.txt").toInt();
+      if (backgroundBrightness == 100) {
+        backgroundBrightness = 0;
+      } else if (backgroundBrightness == 50) {
+        backgroundBrightness = 128;
+      } else if (backgroundBrightness == 25) {
+        backgroundBrightness = 192;
+      } else if (backgroundBrightness == 12) {
+        backgroundBrightness = 223;
+      } else {
+        backgroundBrightness = 0;
+      }
 
+      digitBrightness = readFile(SPIFFS, "/digitBrightness.txt").toInt();
+
+      if (digitBrightness == 100) {
+        digitBrightness = 0;
+      } else if (digitBrightness == 50) {
+        digitBrightness = 128;
+      } else if (digitBrightness == 25) {
+        digitBrightness = 192;
+      }else if (digitBrightness == 12){
+        digitBrightness = 223;
+      } else {
+        digitBrightness = 0;
+      }
+
+
+      // Serial.println("debug every N 60 seconds");
+    }
     String whichFX = readFile(SPIFFS, "/inputString.txt");
     String nachtmode = readFile(SPIFFS, "/nightMode.txt");
     int getallenZwart = readFile(SPIFFS, "/inputInt.txt").toInt();
 
- nightTimeHour = readFile(SPIFFS, "/nightTimeHour.txt").toInt();
-  nightTimeMinute = readFile(SPIFFS, "/nightTimeMinute.txt").toInt();
-  morningTimeHour = readFile(SPIFFS, "/morningTimeHour.txt").toInt();
-  morningTimeMinute = readFile(SPIFFS, "/morningTimeMinute.txt").toInt(); 
 
-    
     if (whichFX != currentAnimation) {
       Serial.println("We are going to switch animation");
       breakAnimation = true;
@@ -121,7 +182,7 @@ void Task1code( void * parameter) {
       nightMode = false;
     }
 
-    delay(2000);
+    delay(2000); // no need to check every milisecond :)
   }
 }
 
@@ -153,19 +214,28 @@ String processor(const String & var) {
   else if (var == "nightMode") {
     return readFile(SPIFFS, "/nightMode.txt");
   }
-  else if (var == "nightTimeHour"){
+  else if (var == "nightTimeHour") {
     return readFile(SPIFFS, "/nightTimeHour.txt");
   }
-  else if (var == "nightTimeMinute"){
+  else if (var == "nightTimeMinute") {
     return readFile(SPIFFS, "/nightTimeMinute.txt");
   }
-  else if (var == "morningTimeHour"){
+  else if (var == "morningTimeHour") {
     return readFile(SPIFFS, "/morningTimeHour.txt");
   }
-  else if (var == "morningTimeMinute"){
+  else if (var == "morningTimeMinute") {
     return readFile(SPIFFS, "/morningTimeMinute.txt");
   }
-  
+  else if (var == "overAllBrightness") {
+    return readFile(SPIFFS, "/overAllBrightness.txt");
+  }
+  else if (var == "backgroundBrightness") {
+    return readFile(SPIFFS, "/backgroundBrightness.txt");
+  }
+  else if (var == "digitBrightness") {
+    return readFile(SPIFFS, "/digitBrightness.txt");
+  }
+
   return String();
 }
 

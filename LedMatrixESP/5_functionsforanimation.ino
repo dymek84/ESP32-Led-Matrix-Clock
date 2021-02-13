@@ -6,10 +6,15 @@
 
 // ShowStrip is used to start the fastled.show() but allows to add a few customizable things
 void showStrip() {
-  // FastLED
 
-  showTime(timeColor); //inject the time.
-  FastLED.setBrightness(64);
+  FastLED.setBrightness(overAllBrightness); // affects the overall brightness of the strip.
+  if (Nachtlamp == true || nightMode == true) {
+    // ignore background dimming
+    showTime(timeColor, 128);  //they are already dimmed a lot
+  }else{
+    fadeToBlackBy( leds, NUM_LEDS, backgroundBrightness);
+    showTime(timeColor, digitBrightness);  // shows the time, and dims the numbers based on the setting.
+  }
   FastLED.show();
 }
 
@@ -310,13 +315,14 @@ void nachtmode() {
   //while (nightMode) {
   timeColor = CHSV(0, 255, 32);
   oneColorBackground(CRGB::Black, 250);
-  FastLED.delay(1000);
+  //FastLED.delay(1000);
   //  if (breakAnimation) {
   //    breakAnimation = false;
   //    break;
   //  }
   //}
   timeColor = ledcol;
+ // showStrip();
 }
 
 /* run a random animation for 1 minute every ... hour, half hour, etc
