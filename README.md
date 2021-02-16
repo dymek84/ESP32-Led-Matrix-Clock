@@ -68,7 +68,7 @@ There are so many things I want to do. But for now this is my action list.
 
 - DONE: Configure colors background and letters.
 		It works, but I don't like the color representation.. Now its RGB but maybe working in HUE is better
-- An option to animate the characters as well.. e.g. ranibow letters :)
+- PARTLY DONE: An option to animate the characters as well.. e.g. rainbow letters :)
 - DONE: Random animation at a given time intervall op 60, 30, 15 minues.
 - DONE: Animation interrupt as some animations will run a long time preventing switching of animations
 - DONE: Nightmode with red letters (dim) and no background. 
@@ -79,6 +79,9 @@ There are so many things I want to do. But for now this is my action list.
 - DONE: Show IP address on bootup
 - Characters can now only be placed based on X position, not Y position yet.
 - DONE: Add photo's to this page
+
+-- ISSUE (or not): When background is fade-down, some animations will not look as good. As a fix some background cannot be faded (even if you set it to fade) the only dimming that will always work is the overall brightness (dimming). 
+-- The code has become very spaghetti. Which as a food I like, but in code not so much. I made this code, using many sources. For future versions I'm going to rewrite stuff. Makeing sure globals are used less and loops are used less. 
 
 # Wires and schema's
 <img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/ESP-schema.png?raw=true" width="400">
