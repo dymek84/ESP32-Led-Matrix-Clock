@@ -79,6 +79,7 @@ There are so many things I want to do. But for now this is my action list.
 - DONE: Show IP address on bootup
 - Characters can now only be placed based on X position, not Y position yet.
 - DONE: Add photo's to this page
+- Translate everything to english (now the webpage is dutch)
 
 -- ISSUE (or not): When background is fade-down, some animations will not look as good. As a fix some background cannot be faded (even if you set it to fade) the only dimming that will always work is the overall brightness (dimming). 
 -- The code has become very spaghetti. Which as a food I like, but in code not so much. I made this code, using many sources. For future versions I'm going to rewrite stuff. Makeing sure globals are used less and loops are used less. 
