@@ -119,6 +119,8 @@ void Task1code( void * parameter) {
       overAllBrightness = readFile(SPIFFS, "/overAllBrightness.txt").toInt();
       if (overAllBrightness == 100) {
         overAllBrightness = 255;
+      } else if (overAllBrightness == 75) {
+        overAllBrightness = 192;
       } else if (overAllBrightness == 50) {
         overAllBrightness = 128;
       } else {
@@ -127,6 +129,8 @@ void Task1code( void * parameter) {
       backgroundBrightness = readFile(SPIFFS, "/backgroundBrightness.txt").toInt();
       if (backgroundBrightness == 100) {
         backgroundBrightness = 0;
+      } else if (backgroundBrightness == 75) {
+        backgroundBrightness = 64;
       } else if (backgroundBrightness == 50) {
         backgroundBrightness = 128;
       } else if (backgroundBrightness == 25) {
@@ -141,11 +145,13 @@ void Task1code( void * parameter) {
 
       if (digitBrightness == 100) {
         digitBrightness = 0;
+      } else if (digitBrightness == 75) {
+        digitBrightness = 64;
       } else if (digitBrightness == 50) {
         digitBrightness = 128;
       } else if (digitBrightness == 25) {
         digitBrightness = 192;
-      }else if (digitBrightness == 12){
+      } else if (digitBrightness == 12) {
         digitBrightness = 223;
       } else {
         digitBrightness = 0;
@@ -156,7 +162,7 @@ void Task1code( void * parameter) {
     }
     String whichFX = readFile(SPIFFS, "/inputString.txt");
     String nachtmode = readFile(SPIFFS, "/nightMode.txt");
-    int getallenZwart = readFile(SPIFFS, "/inputInt.txt").toInt();
+    getallenZwart = readFile(SPIFFS, "/inputInt.txt").toInt();
 
 
     if (whichFX != currentAnimation) {
@@ -170,10 +176,14 @@ void Task1code( void * parameter) {
     String backgroundColor_1 = readFile(SPIFFS, "/inputBGCol.txt");
     backgroundColor = strtol(backgroundColor_1.substring(1).c_str(), NULL, 16);
 
-    if (getallenZwart < 1) {
+    if (getallenZwart == 0) {
       timeColor = CRGB::Black;
-    } else {
+    } else if (getallenZwart == 1) {
       timeColor = digitColor;
+    } else {
+      /* try to make rainbow cycle the digits
+      */
+     //timeColor = digitColor;
     }
 
     if (nachtmode == "Ja") {

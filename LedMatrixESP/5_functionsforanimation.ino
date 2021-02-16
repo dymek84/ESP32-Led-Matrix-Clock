@@ -5,14 +5,22 @@
 */
 
 // ShowStrip is used to start the fastled.show() but allows to add a few customizable things
+/* show strip
+   Is basically the Fastled.show, but adds the time on top of the animation.
+   It also implements the overall dimming/fades that are set by the user
+   The overAllBrighness (global) is the total brightness of the matrix. After this brightness, the fadeTo's are ran.
+   The backgroundBrighness (global) is used to fade the background with an given %. (calculated as fraction of 256. so 128 = 50% and 32 is only dimming by 12.5%
+   digitBrighness (glabal) is used to fade the digits of the clock to a certain % (like background).
+*/
 void showStrip() {
 
   FastLED.setBrightness(overAllBrightness); // affects the overall brightness of the strip.
   if (Nachtlamp == true || nightMode == true) {
     // ignore background dimming
     showTime(timeColor, 128);  //they are already dimmed a lot
-  }else{
-    fadeToBlackBy( leds, NUM_LEDS, backgroundBrightness);
+  } else {
+    // fadeToBlackBy( leds, NUM_LEDS, backgroundBrightness); // dims all the way to black
+    fadeLightBy( leds, NUM_LEDS, backgroundBrightness); // never dims all the way to black.
     showTime(timeColor, digitBrightness);  // shows the time, and dims the numbers based on the setting.
   }
   FastLED.show();
@@ -313,7 +321,7 @@ void nachtmode() {
   // Serial.println("good night..");
   CRGB ledcol = timeColor;
   //while (nightMode) {
-  timeColor = CHSV(0, 255, 32);
+  timeColor = CHSV(0, 255, 32); //Very faint red numbers.
   oneColorBackground(CRGB::Black, 250);
   //FastLED.delay(1000);
   //  if (breakAnimation) {
@@ -322,7 +330,7 @@ void nachtmode() {
   //  }
   //}
   timeColor = ledcol;
- // showStrip();
+  // showStrip();
 }
 
 /* run a random animation for 1 minute every ... hour, half hour, etc
@@ -362,7 +370,7 @@ void runRandomAnimation(int every) {
   }
 
 
-  int randomNumber = rand() % 11 + 1;
+  int randomNumber = rand() % 12 + 1;
   while (runAnimation) {
     if (randomNumber == 1) {
       Serial.println("showing: Rainbow");
@@ -389,27 +397,39 @@ void runRandomAnimation(int every) {
     }
     else if (randomNumber == 5) {
       Serial.println("showing: Snow Sparkle");
+      int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
+
       SnowSparkle(0x10, 0x10, 0x10, 20, random(100, 1000));
+      backgroundBrightness = tempbackground;
     }
     else if (randomNumber == 6) {
       Serial.println("showing: Random Twinkle");
+      int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
       setAll(0, 0, 0);
       TwinkleRandom(40, 200, false);
-
+      backgroundBrightness = tempbackground;
     }
     else if (randomNumber == 7) {
       Serial.println("showing: MeteoRain");
       meteorRain(0xff, 0xff, 0xff, 10, 64, true, 30);
     }
     else if (randomNumber == 8) {
+      int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
       Serial.println("showing: Confetti");
       ChangeMe();
       EVERY_N_MILLISECONDS(thisdelay) {   // FastLED based non-blocking delay to update/display the sequence.
         confetti();
       }
       showStrip();
+      backgroundBrightness = tempbackground;
     }
     else if (randomNumber == 9) {
+      int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
+
       Serial.println("showing: Plasma");
       EVERY_N_MILLISECONDS(50) {                                  // FastLED based non-blocking delay to update/display the sequence.
         plasma();
@@ -419,8 +439,12 @@ void runRandomAnimation(int every) {
         targetPalette = CRGBPalette16(CHSV(baseC + random8(32), 192, random8(128, 255)), CHSV(baseC + random8(32), 255, random8(128, 255)), CHSV(baseC + random8(32), 192, random8(128, 255)), CHSV(baseC + random8(32), 255, random8(128, 255)));
       }
       showStrip();
+      backgroundBrightness = tempbackground;
     }
     else if (randomNumber == 10) {
+      Serial.println("showing: Ripples");
+      int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
       currentPalette = OceanColors_p;                                   // Use palettes instead of direct CHSV or CRGB assignments
       targetPalette = OceanColors_p;                                    // Also support smooth palette transitioning
 
@@ -437,8 +461,10 @@ void runRandomAnimation(int every) {
         rippless();                                                                   // Run the ripple routine.
       }
       showStrip();
+      backgroundBrightness = tempbackground;
     }
     else if (randomNumber == 11) {
+      Serial.println("showing: Beatwave");
       currentPalette = RainbowColors_p;
       beatwave();
 
@@ -452,10 +478,13 @@ void runRandomAnimation(int every) {
       }
 
       showStrip();
+    } else if (randomNumber == 12) {
+      dot_beat();
+      showStrip();
     }
 
     if (minute == 0 || minute == 15 || minute == 30 || minute == 45) {
-
+      // stay in this loop
     } else {
       Serial.println("End random animation");
       runAnimation = false;
@@ -493,12 +522,18 @@ void fadeToBlack(int ledNo, byte fadeValue) {
 
 // EFFECTS ARE TAKEN FROM https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#FastLEDFramework
 
-// The next fx come from https://github.com/atuline/FastLED-Demos/blob/master/confetti/confetti.ino
-void confetti() {                                             // random colored speckles that blink in and fade smoothly
+// The next fx come from https://github.com/atuline/FastLED-Demos
+void confetti() {
+  int tempbackground = backgroundBrightness; //store gloval background.
+  backgroundBrightness = 0;
+
+  // random colored speckles that blink in and fade smoothly
   fadeToBlackBy(leds, NUM_LEDS, thisfade);                    // Low values = slower fade.
   int pos = random16(NUM_LEDS);                               // Pick an LED at random.
   leds[pos] += CHSV((thishue + random16(huediff)) / 4 , thissat, thisbri); // I use 12 bits for hue so that the hue increment isn't too quick.
   thishue = thishue + thisinc;                                // It increments here.
+
+  backgroundBrightness = tempbackground;
 } // confetti()
 
 void ChangeMe() {                                             // A time (rather than loop) based demo sequencer. This gives us full control over the length of each sequence.
@@ -516,7 +551,6 @@ void ChangeMe() {                                             // A time (rather 
 } // ChangeMe() for confetti
 
 void plasma() {                                                 // This is the heart of this program. Sure is short. . . and fast.
-
   int thisPhase = beatsin8(6, -64, 64);                         // Setting phase change for a couple of waves.
   int thatPhase = beatsin8(7, -64, 64);
 
@@ -527,7 +561,6 @@ void plasma() {                                                 // This is the h
 
     leds[k] = ColorFromPalette(currentPalette, colorIndex, thisBright, currentBlending);  // Let's now add the foreground colour.
   }
-
 }
 
 void rippless() {
@@ -576,3 +609,18 @@ void beatwave() {
   }
 
 } // beatwave()
+
+
+void dot_beat() {
+
+  uint8_t inner = beatsin8(bpm, NUM_LEDS / 4, NUM_LEDS / 4 * 3); // Move 1/4 to 3/4
+  uint8_t outer = beatsin8(bpm, 0, NUM_LEDS - 1);             // Move entire length
+  uint8_t middle = beatsin8(bpm, NUM_LEDS / 3, NUM_LEDS / 3 * 2); // Move 1/3 to 2/3
+
+  leds[middle] = CRGB::Purple;
+  leds[inner] = CRGB::Blue;
+  leds[outer] = CRGB::Aqua;
+
+  nscale8(leds, NUM_LEDS, fadeval);                           // Fade the entire array. Or for just a few LED's, use  nscale8(&leds[2], 5, fadeval);
+
+} // dot_beat()

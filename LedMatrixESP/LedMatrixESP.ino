@@ -92,6 +92,7 @@ int nightTimeHour = 22;
 int nightTimeMinute = 00;
 int morningTimeHour = 7;
 int morningTimeMinute = 00;
+int getallenZwart = 0;
 
 /* some variable for an other FX library */
 uint8_t  thisfade = 8;                                        // How quickly does it fade? Lower = slower fade rate.
@@ -102,6 +103,11 @@ uint8_t   thisbri = 255;                                      // Brightness of a
 int       huediff = 256;                                      // Range of random #'s to use for hue
 uint8_t thisdelay = 5;                                        // We don't need much delay (if any)
 
+// dots_beat
+uint8_t   count =   0;                                        // Count up to 255 and then reverts to 0
+uint8_t fadeval = 224;                                        // Trail behind the LED's. Lower => faster fade.
+
+uint8_t bpm = 30;
 
 // The nice thing about ESp32 is 2 cores.. so let's make use of both.
 TaskHandle_t Task1;
@@ -154,6 +160,7 @@ const char index_html[] PROGMEM = R"rawliteral(
             <option value = "plasma">Plasma</option>
             <option value = "ripples">ripples</option>
             <option value = "raibowWaves">Regenboog golven</option>
+            <option value = "dotsBeat">Dots</option>
       </select>
   </form><br />
   
@@ -163,6 +170,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <option value="%inputInt%" selected> %inputInt% </option>
     <option value="1">Aan (1)</option>
     <option value="0">Uit (0)</option>
+    <option value="2">Regenboog (2)</opion>
     </select>
   </form><br />
   
@@ -183,16 +191,18 @@ const char index_html[] PROGMEM = R"rawliteral(
     <select name="overAllBrightness" id="overAllBrightness" onchange="this.form.submit()">
       <option value="%overAllBrightness%" selected> %overAllBrightness% </option>
         <option value="100">100 </option>
+         <option value="75">75 </option>
         <option value="50">50 </option>
         <option value="25">25 </option>
     </select>
     </form>
 
  <form action="/get" target="hidden-form">
-    <label for="achergrondhelderheid" name="backgroundBrightness" >Pas de helderheid van de achtergrond aan </label> <br />
+    <label for="achergrondhelderheid" name="backgroundBrightness" >Pas de helderheid van de achtergrond aan (werkt niet voor alle effecten)</label> <br />
     <select name="backgroundBrightness" id="backgroundBrightness" onchange="this.form.submit()">
       <option value="%backgroundBrightness%" selected> %backgroundBrightness% </option>
         <option value="100">100 </option>
+        <option value="75">75 </option>
         <option value="50">50 </option>
         <option value="25">25 </option>
         <option value="12">12 </option>
@@ -204,6 +214,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <select name="digitBrightness" id="digitBrightness"  onchange="this.form.submit()">
       <option value="%digitBrightness%" selected> %digitBrightness% </option>
         <option value="100">100 </option>
+         <option value="75">75 </option>
         <option value="50">50 </option>
         <option value="25">25 </option>
         <option value="12">12 </option>
@@ -211,7 +222,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     </form>
    
    <form action="/get" target="hidden-form">
-   Handmatige Nachtstand:<br />
+   Handmatige nachtstand:<br />
     <select name="nightMode" id="nachtstand" onchange="this.form.submit()">
       <option value="%nightMode%" selected> %nightMode% </option>
         <option value="Ja">Ja </option>
@@ -282,7 +293,7 @@ De nachtstand kan ook automatisch aan en uitgezet worden, kies een begin tijd en
     </select>
      </form>
      <br />Tussen %nightTimeHour%:%nightTimeMinute% in de avond en %morningTimeHour%:%morningTimeMinute%  in de ochtend<br />
-     zal de klok in nacht-stand staan. <br />
+     zal de klok in nachtstand staan. <br />
     <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";
 
@@ -613,6 +624,7 @@ void loop() {
   }
 
 
+
   /* nightMode can be switched on manually
       but also set for a start and end time (hours and minutes)
   */
@@ -665,8 +677,11 @@ void loop() {
       colorWipe(0x00, 0x00, 0x00, 50);
       breakAnimation = false;
     } else if (whichFX == "Sneeuw") {
+       int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
       //    setAll(0,0,0);
       SnowSparkle(0x10, 0x10, 0x10, 20, random(100, 1000));
+      backgroundBrightness = tempbackground;
     } else if (whichFX == "randomTwinkle") {
       setAll(0, 0, 0);
       TwinkleRandom(40, 200, false);
@@ -686,12 +701,17 @@ void loop() {
     } else if (whichFX == "randomEvery15") {
       runRandomAnimation(15);
     } else if (whichFX == "confetti") {
+      int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
       ChangeMe();
       EVERY_N_MILLISECONDS(thisdelay) {                           // FastLED based non-blocking delay to update/display the sequence.
         confetti();
       }
       showStrip();
+       backgroundBrightness = tempbackground;
     } else if (whichFX == "plasma") {
+      int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
       currentPalette = OceanColors_p;
       EVERY_N_MILLISECONDS(50) {                                  // FastLED based non-blocking delay to update/display the sequence.
         plasma();
@@ -701,9 +721,12 @@ void loop() {
         targetPalette = CRGBPalette16(CHSV(baseC + random8(32), 192, random8(128, 255)), CHSV(baseC + random8(32), 255, random8(128, 255)), CHSV(baseC + random8(32), 192, random8(128, 255)), CHSV(baseC + random8(32), 255, random8(128, 255)));
       }
       showStrip();
+       backgroundBrightness = tempbackground;
     } else if (whichFX == "ripples") {
+       int tempbackground = backgroundBrightness; //store gloval background.
+      backgroundBrightness = 0;
       currentPalette = OceanColors_p;                                   // Use palettes instead of direct CHSV or CRGB assignments
-      targetPalette = OceanColors_p;                                    // Also support smooth palette transitioning
+      targetPalette = RainbowColors_p;                                    // Also support smooth palette transitioning
 
       EVERY_N_MILLISECONDS(50) {                                                      // Smooth palette transitioning runs continuously.
         uint8_t maxChanges = 24;
@@ -718,6 +741,7 @@ void loop() {
         rippless();                                                                   // Run the ripple routine.
       }
       showStrip();
+        backgroundBrightness = tempbackground;
     } else if (whichFX == "raibowWaves") {
       currentPalette = RainbowColors_p;
       beatwave();
@@ -731,6 +755,9 @@ void loop() {
         targetPalette = CRGBPalette16(CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 192, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)));
       }
 
+      showStrip();
+    } else if(whichFX = "dotsBeat"){
+      dot_beat();
       showStrip();
     } else {
       // we can use this place to also test new animation :)
