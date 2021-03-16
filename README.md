@@ -1,7 +1,7 @@
 <img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/IMG_6880.jpeg?raw=true" width="250"><img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/IMG_6878.jpeg?raw=true" width="250">
 [![](http://img.youtube.com/vi/N7SGHlUMIps/0.jpg)](http://www.youtube.com/watch?v=N7SGHlUMIps "")
 
-# ESP32-Led-Matrix-Clock
+# ESP32-Led-Matrix-Clock. VERSION 2.0 since March 16-2021
 A led matrix clock ran on an ESP32 using FastLED and a led matrix
 
 # How I got to this project
@@ -9,7 +9,7 @@ Based on the LED projects by Bitluni (https://bitluni.net) I got excited to use 
 After creating my LED Pingpong Ball light I wanted something else. So I stumbled on the LED clock video https://www.youtube.com/watch?v=7urN2OS0fjs by Thomas https://www.instructables.com/Ping-Pong-Ball-LED-Clock/ and https://www.hackster.io/news/improved-led-ping-pong-ball-clock-232a0ac06643
 I loved these creations. But... (always a but), this is a BIG clock, a bit too much for my livingroom. Also these clocks run on an arduino and I wanted to use an ESP32.
 # Why an ESP32? 
-In this project I used: Wemos Mini D1 EPS32). https://www.amazon.nl/ESP-32S-Wireless-Bluetooth-Esp8266-CP2102/dp/B07NW8S1ZR
+In this project I used: Wemos Mini D1 EPS32 and the ESP32 Devkit V1 both work ). https://www.amazon.nl/ESP-32S-Wireless-Bluetooth-Esp8266-CP2102/dp/B07NW8S1ZR
 Because it has built-in WIFI, Bluetooth, DualCore, RTC and much much more. Oh, and a lot of program memory.
 
 # Leds (WS2812 8x32 LED matrix)
@@ -38,9 +38,9 @@ I used a lot of global variables. Some lineair thinking and ugly if loops. And w
 #include <String> //already in arduino after installing the ESP32 environment
 #include <AsyncTCP.h> // https://github.com/me-no-dev/AsyncTCP
 #include <ESPAsyncWebServer.h> // https://github.com/me-no-dev/ESPAsyncWebServer
-#include <SPIFFS.h> //already in arduino after installing the ESP32 environment
 #include "soc/soc.h" //already in arduino after installing the ESP32 environment
-#include "soc/rtc_cntl_reg.h" //already in arduino after installing the ESP32 environment
+#include "soc/rtc_cntl_reg.h" //already in arduino after installing the ESP32 environmen
+#include <Preferences.h>  // works much better than spiffs...to store parameters persistently during reboots.
   
 Issues I have encountered on my Mac (OSX 11.2.1) when trying to compile in arduino are...:
 - Almost after every OSX update I get error messages that compiling is not possible: Run this in the terminal --> sudo xcode-select --install
@@ -49,7 +49,7 @@ Issues I have encountered on my Mac (OSX 11.2.1) when trying to compile in ardui
 - This guide: https://randomnerdtutorials.com/esp32-troubleshooting-guide/ helped me basically with all issues.
 
 Important:
-The first .ino file (called LEdMatrixESP) contains all globals and settings for the LED types used, amount of LED's, the max current and voltage used, and on which ESP32 pin(s) the LED's are connected. Make sure everything is correct. 
+The first .ino file (called LEdMatrixESP2) contains all globals and settings for the LED types used, amount of LED's, the max current and voltage used, and on which ESP32 pin(s) the LED's are connected. Make sure everything is correct. 
 More over the ledArray[XRES * YRES] is THE place to configure your matrix. It basically tells which LED number is on which X,Y coordinate. As this may differ between led matrices.  Mine for example was a up/down/down/up/up...etc configuration. This part is some hand-work. For sure somebody may have a smarter and more mathematical approach. Well this works for me.   The numberMatix stores the number characters.. Which in this case are actually 6x6 pixel characters in a 8x8 array (64). You can create your own font if you like, but just changing the 0 and 1 at specific positions. 
 Also in this file you find the HTML pages that are served to configure the clock once it is up and running.
 
@@ -60,7 +60,7 @@ Also in this file you find the HTML pages that are served to configure the clock
 2.2. If connected to your wifi station (router). The LED on the matrix will turn green. 
 3. The ESP32 will display a 1 or 2 or 3 digit number. Those are the last 3 numbers of it's IP address. Most often the IP address will be 192.168.1.xxx (where xxx is the number on the matrix). In case you have a very different router DNS config, you should connect your clock to the serial monitor, and there the full IP address will be shown.  
 4. A 3rd LED will light-up orange, this is the ESP32 tryiing to get the time from the NTP server: europe.pool.ntp.org (change NTP server if need be in the sketch).
-Sometimes the NTP server doesn't respond. The ESP32 will try 5 times (~15-20 seconds) before it decides to give up and reboot. A reboot often does the trick.
+Sometimes the NTP server doesn't respond. The ESP32 will try 5 times (~15-20 seconds) before it decides to give up and reboot. A reboot often does the trick. Also have a look at the NTP server settings.. it is now set to the NL timezone with Daylight Saving enabled.
 5. If network time is configured the time will be shown on the matrix. 
 6. Now you can surf to the ESP's ip address and play with the configuration, change animations, LED colors, set a night mode, or choose for a random animation to be shown at specific intervalls. 
 
@@ -68,10 +68,9 @@ Sometimes the NTP server doesn't respond. The ESP32 will try 5 times (~15-20 sec
 There are so many things I want to do. But for now this is my action list.
 
 - DONE: Configure colors background and letters.
-		It works, but I don't like the color representation.. Now its RGB but maybe working in HUE is better
-- PARTLY DONE: An option to animate the characters as well.. e.g. rainbow letters :)
-- DONE: Random animation at a given time intervall op 60, 30, 15 minues.
-- DONE: Animation interrupt as some animations will run a long time preventing switching of animations
+- DONE: Choose an animation for the background or digits.
+- DONE: Set a text on the website and display it on the matrix.		
+- DONE: Random animation at a given time intervall op 60, 30, 15, 1 minutes.
 - DONE: Nightmode with red letters (dim) and no background. 
 - DONE: Sleep and wakeup times for nightmode.. (limited to specific times for now)
 - DONE: Option to globally dim the display, and seperate dimming options for characters and background.
@@ -80,15 +79,15 @@ There are so many things I want to do. But for now this is my action list.
 - DONE: Show IP address on bootup
 - Characters can now only be placed based on X position, not Y position yet.
 - DONE: Add photo's to this page
-- Translate everything to english (now the webpage is dutch)
+- IMPLEMENTED: a more simple method to animate background and foreground without them inteferring..(most of the time).
 
 -- ISSUE (or not): When background is fade-down, some animations will not look as good. As a fix some background cannot be faded (even if you set it to fade) the only dimming that will always work is the overall brightness (dimming). 
--- The code has become very spaghetti. Which as a food I like, but in code not so much. I made this code, using many sources. For future versions I'm going to rewrite stuff. Makeing sure globals are used less and loops are used less. 
+-- The code for this version 2.0 is way more structured. But still at some points spaghetti.. but its faster and easier to read (more comments inline) and better use of functions().
 
 # Wires and schema's
 <img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/ESP-schema.png?raw=true" width="400">
 In the (bad) photo you see how I soldered everyting on a soldering breadboard. (5cm x 7 cm). 
-On the ESP32 I soldered pins on the ground, Pin2 and 5V places. And on the right side row two pins, one on the top and one on the bottom of the outer rows.
+On the ESP32 I soldered pins on the ground, Pin2 and 5V places. And on the right side row two pins, one on the top and one on the bottom of the outer rows. Note: Pin2 was used in version 1, for version 2 I used pin 13. You can still use 2 of any other pin, just set it correct in the code!! #define DATA_PIN .. (where .. is your data pin number)
 ((Pins, also called male Pin Header, <img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/Screenshot%202021-02-11%20at%2015.35.48.png" width="100"> you can break of seperate pins ;
 This makes a square of pins. In this way every corner connects to the sockets on the breadboard and this makes it more stable.
 On the soldering breadbord I soldered the sockets/connectors. This makes the ESP32 plug and play in case you want to add, change stuff.
