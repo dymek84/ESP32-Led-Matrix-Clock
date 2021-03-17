@@ -17,7 +17,8 @@
 #include <String>
 #include <AsyncTCP.h>                                 // Webserver stuff
 #include <ESPAsyncWebServer.h>                        // More webserver stuff
-#include <SPIFFS.h>                                   // Flash memory file system..
+#include <HTTPClient.h>                               // Needed to get some information from the internetz.. .like weather data   
+#include <Arduino_JSON.h>                             // Often this data comes as JSON :)
 #include "soc/soc.h"                                  // Used to make taksk on diferent cores
 #include "soc/rtc_cntl_reg.h"
 #include <Preferences.h>                              // Store the prefences in permanent memory in a much easier way than SPIFFS
@@ -35,7 +36,6 @@
 #define BRIGHTNESS 255                                // INITIAL BRIGHNESS OF THE MATRIX.
 #define VOLTAGE 5                                     // THE VOLTAGE OUR SYSTEM USES
 #define AMPS 5000                                     // THE CURRENT THAT YOUR POWERBRICK CAN DELIVER e.g 5 AMP (or 5000 mA)
-
 #define qsubd(x, b)  ((x>b)?b:0)                      // Digital unsigned subtraction macro. if result <0, then => 0. Otherwise, take on fixed value.
 #define qsuba(x, b)  ((x>b)?x-b:0)                    // Analog Unsigned subtraction macro. if result <0, then => 0
 
@@ -77,6 +77,7 @@ uint8_t digitBrightness = 128;                        // THE DIGIT BRIGHNESS (AL
 uint8_t overAllBrightness = 128;                      // THE OVERALL BRIGHTNESS AFFECTS ALL LEDS.
 boolean nightMode = false;                            // IS THE MATRIX IN NIGHT (BEDTIME) MODE
 boolean useOld = false;                               // WHEN TRUE THE TIMEMATIX WILL TAKE THE LEDs COLOR THAT WAS ALREADY THERE
+int scrollspeed = 150;                                // DEFAULT TEXT SCROLLING SPEED. LOWER IS FASTER. ITS DEFINED AS A STEP PER XX MILLISECONDS
 
 int nightTimeHour = 22;                               // THE NEXT SETTINGS ARE USED TO SET A TIME IN BETWEEN THE MATRIX IS IN NIGHTMODE
 int nightTimeMinute = 00;
@@ -91,6 +92,12 @@ int Hour;
 int Day;
 int Month;
 int Year;
+
+String endpoint = "http://api.openweathermap.org/data/2.5/weather?q=";
+String city = "Arnhem";                                             // This needs to be set via the webinterface.
+String apikey;    // This API key will be set via the webinterface
+String units = "metric";                                 // Set to standard, metric or imperial in case you need degrees celsius of F.
+String weatherJSON = "{}";
 
 String BGHTMLcol = "#000000";
 String digitHTMLcol = "#000000";
@@ -138,7 +145,7 @@ std::map<int, CRGB> rippless(std::map<int, CRGB>);
 std::map<int, CRGB> displayTimeNoAnimation(std::map<int, CRGB>);
 std::map<int, CRGB> Sparkle(std::map<int, CRGB>,  CRGB, boolean, int);
 std::map<int, CRGB> confetti(std::map<int, CRGB> );
-std::map<int, CRGB> recolorDigits(std::map<int, CRGB>,CRGB);
+std::map<int, CRGB> recolorDigits(std::map<int, CRGB>, CRGB);
 
 /* some strucs for animation */
 #define maxRipples 6
@@ -301,9 +308,11 @@ void setup() {
     Serial.println("No Network time was obtained, therefore we will reboot to try again");
     ESP.restart();
   }
-  preferences.end();                                               // You quit prefs for now.. need to open BEGIN it again when needed.
-  timeMatrix = getTimeMatrix(digitAnimation, CRGB::Black);           // This is the time matrix.. lets make sure it exsists
+  preferences.end();                                                // You quit prefs for now.. need to open BEGIN it again when needed.
+  timeMatrix = getTimeMatrix(digitAnimation, CRGB::Black);          // This is the time matrix.. lets make sure it exsists
+  weatherJSON = getTheWeather(endpoint, apikey, city, units);       // Get the initial weather data
   Serial.println("Setup of matrixclock finished. Let's rock and roll");
+  Serial.println(" ");
 
 } //setup()
 
@@ -323,6 +332,7 @@ void loop() {
 
   FastLED.setBrightness(overAllBrightness);           // SET the MAtrix brightness to the global setting
 
+
   EVERY_N_MILLISECONDS(500) {                         // update the global time variables
     updateLocalTime();
   }
@@ -331,9 +341,9 @@ void loop() {
     nightModeOnOrOff();
   }
 
-  int  arrlength = 8;
+  int  arrlength = 9;
   String animationArray[arrlength] = {                // Here we set all the effects that can be used as random animation.
-    "Sweep", "plasma", "rainbowWaves", "dotsBeat", "confetti", "ripples", "sparkle", "showText"
+    "Sweep", "plasma", "rainbowWaves", "dotsBeat", "confetti", "ripples", "sparkle", "showText", "showWeather"
   };
 
   int arrl = 4;
@@ -403,8 +413,6 @@ void loop() {
       digitActivity = "Rainbow";
     }
   }
-
-
 
   /**
      Below you find the call's to the different animations.. or actions as I call them. Not always it will be an animation
@@ -512,17 +520,51 @@ void loop() {
     }
     else if (activity == "showText") {
       // is the text longer then 4 characters? if so, we need to scroll.
-      int textlength = scrolltext.length();
-      if (digitActivity=="Sparke" || digitActivity=="Sweep"){             // These just don't work with scrolling text
+      // Add the time to the scroller
+      //Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+      String tijd = String(Hour) + ":" + String(Minute);
+      String newScrolltext = tijd + " - " + scrolltext;
+      int textlength = newScrolltext.length();
+      if (digitActivity == "Sparke" || digitActivity == "Sweep") {        // These just don't work with scrolling text
         digitActivity == "No animation";
       }
-
-      EVERY_N_MILLISECONDS(150) {
+      EVERY_N_MILLISECONDS(scrollspeed) {
         textScroller++;
         if (textScroller >= textlength * 7) {
           textScroller = -34;
         }
-        timeMatrix = showText(scrolltext, digitColor, textScroller);
+        timeMatrix = showText(newScrolltext, digitColor, textScroller);
+        bgMatrix = getBackgroundMap(timeMatrix);
+        bgMatrix = oneColorBackground(bgMatrix, backgroundColor);         // And we will give it a black background.
+      }
+      //digitActivity = "Rainbow";
+    }
+    else if (activity == "showWeather") {
+      EVERY_N_SECONDS(60) {
+        weatherJSON = getTheWeather(endpoint, apikey, city, units);
+      }
+      String tempOutside = returnFromJSON(weatherJSON, "main", "temp");
+      String maxtempOutside = returnFromJSON(weatherJSON, "main", "temp_max");
+      String mintempOutside = returnFromJSON(weatherJSON, "main", "temp_min");
+      String textForDisplay = "Now: " + tempOutside + "C'"+ " Max: "+maxtempOutside+"C' Min: "+mintempOutside+"C'";
+      String minuten = String(Minute);
+
+      if (minuten.length() < 2){
+        minuten = "0"+minuten;
+      }
+      String tijd = String(Hour) + ":" + minuten;
+      textForDisplay = tijd + " - " + textForDisplay;
+
+      int textlength = textForDisplay.length();
+      if (digitActivity == "Sparke" || digitActivity == "Sweep") {        // These just don't work with scrolling text
+        digitActivity == "No animation";
+      }
+      EVERY_N_MILLISECONDS(scrollspeed) {
+        textScroller++;
+        if (textScroller >= textlength * 7) {
+          textScroller = -34;
+        }
+        timeMatrix = showText(textForDisplay, digitColor, textScroller);
         bgMatrix = getBackgroundMap(timeMatrix);
         bgMatrix = oneColorBackground(bgMatrix, backgroundColor);         // And we will give it a black background.
       }

@@ -71,23 +71,24 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Saved value to ESP SPIFFS");
+      alert("Restarting ESP");
       setTimeout(function(){ document.location.reload(false); }, 500);   
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
     Choose your background animation. The current effect: - %effect% <br />
       <select name="effect" id="effecten" onchange="this.form.submit()">
-        <option value="%effect%" selected> %effect% </option>
-        <option value="oneColorBackground">Fixed Background </option>
-        <option value="rainbowCycle">Rainbow Background</option>
-        <option value="sparkle">Sparkle</option>
+        <option value = "%effect%" selected> %effect% </option>
+        <option value = "oneColorBackground">Fixed Background </option>
+        <option value = "rainbowCycle">Rainbow Background</option>
+        <option value = "sparkle">Sparkle</option>
         <option value = "confetti">Confetti</option>
         <option value = "plasma">Plasma</option>
         <option value = "ripples">Ripples</option>
         <option value = "rainbowWaves">Rainbow Waves</option>
         <option value = "dotsBeat">Dots</option>
-        <option value = "showText">ShowText</option>
+        <option value = "showText">Show your Text</option>
+        <option value = "showWeather">Show the Weather</option>
         <option value = "Sweep">Sweep</option>
         <option value = "test">test</option>
       </select>
@@ -248,6 +249,37 @@ The nightmode can also be set to start and end between certain times.
         <input type="text" id="scrolltext" name="scrolltext" value ="%scrolltext%" maxlength="20">
         <input type="submit" value="Submit" >
       </form>
+      <form action="/get" target="hidden-form">
+     <p> Text Scroll speed (needs a reboot after you set a new speed): <br />
+     <div class="slidecontainer">
+        <input name="scrollspeed" type="range" min="1" max="255" value="%scrollspeed%" class="slider" id="digitBrightness"  onchange="this.form.submit()">
+        Value: %scrollspeed% 
+      </div>
+     </form>
+     </p>
+     <form action="/get" target="hidden-form">
+  After provinding a SSID name and Password, you can click this button to retart the Clock. <br />
+  <input type="submit" name="restart" value="Restart clock" onclick="submitMessage()">
+  <br />
+  </form>
+  <br />
+  <h3> Weather data </h3>
+  The clock can also show weather data. But it needs some settings for this. <br/>
+  You need a openweathermap account (https://openweathermap.org). From your account you need to go to My API keys (https://home.openweathermap.org/api_keys) and create a new key. <br/>
+  This key you need to enter here:
+   <form action="/get" target="hidden-form">
+      API key: <br />
+        <input type="text" id="apikey" name="apikey" value ="%apikey%">
+        <input type="submit" value="Submit" >
+      </form> <br />
+      We also need your location. Remember only use large city names in your local area. Small towns are likely not in the API. <br />
+      <form action="/get" target="hidden-form">
+      Town: <br />
+        <input type="text" id="city" name="city" value ="%city%">
+        <input type="submit" value="Submit" >
+      </form> <br />
+      
+  
     <iframe style="display:none" name="hidden-form"></iframe>
     <br /> Made by Bas van Breukelen (c) 2021 
   <br /> This matrix has rebooted: %iRebooted% times since first installing Led-Clock <br />
@@ -256,28 +288,28 @@ The nightmode can also be set to start and end between certain times.
 // Webpage that is served when ESP is in case accessmode:
 const char index2_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html><head>
-  <title>Matrix Clock, Accesspoint... Swtup mode</title>
+  <title>Matrix Clock, Accesspoint... Setup mode</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Saved value to ESP SPIFFS");
+      alert("Restarting device");
       setTimeout(function(){ document.location.reload(false); }, 500);   
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
-    Wat is de naam van je wifi station: ( %inputWifi% ) <br /> 
-    Druk op submit als je een nieuwe naam hebt ingevoerd. Voer daarna pas een wachtwoord in.<br />
+    What is the name of your WIFI station (SSID): ( %inputWifi% ) <br /> 
+    Press submit after entering the SSID. After this, enter your WIFI credentials (password or key).<br />
     <input type="text " name="inputWifi" value="%inputWifi%">
-    <input type="submit" value="Submit" onclick="submitMessage()">
+    <input type="submit" value="Submit" >
   </form><br>
   <form action="/get" target="hidden-form">
-    Wat is het wachtwoord van je wifi station <br />
+   What is your WIFI networks password (or key) <br />
     <input type="password " name="inputPWD" value="%inputPWD%">
-    <input type="submit" value="Submit" onclick="submitMessage()">
+    <input type="submit" value="Submit">
   </form><br>
   <form action="/get" target="hidden-form">
-  Druk op deze knop als je een nieuw wachtwoord en ssid hebt opgegeven <br />
-  <input type="submit" value="Start opnieuw op" onclick="submitMessage()">
+  After provinding a SSID name and Password, you can click this button to restart the clock. <br />
+  <input type="submit" value="Restart clock" onclick="submitMessage()">
   <br />
   </form>
   

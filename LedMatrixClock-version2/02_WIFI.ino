@@ -146,6 +146,14 @@ String processor(const String & var) {
   }
   else if (var == "scrolltext") {
     return String(scrolltext);
+  } else if (var == "scrollspeed") {
+    return String(scrollspeed);
+  }
+  else if (var == "city") {
+    return String(city);
+  }
+  else if (var == "apikey") {
+    return String(apikey);
   }
   return String();
 }
@@ -159,34 +167,27 @@ void notFound(AsyncWebServerRequest * request) {
 
 
 void displayIP() {
-  std::map<int, CRGB> test;
-  CRGB dcolor = CRGB::Red;
-  test = makeDigits(letterMatrix[9], test, -2, 0, true, dcolor);
-  test = makeDigits(letterMatrix[16], test, 3, 0, false, dcolor);
-  displayTimeNoAnimation(test);
-  FastLED.show();
-  FastLED.delay(200);
-
   String ip = WiFi.localIP().toString();
-  String iplast0 = ip.substring(ip.length() - 1);
-  String iplast1 = ip.substring(ip.length() - 2, ip.length() - 1);
-  String iplast2 = ip.substring(ip.length() - 3, ip.length() - 2);
+  int textScroller = -34;
+  int counter = 0;
+  String scrolltextip = "ip: " + ip;
+  int textlentgh = scrolltextip.length();
 
-  if (iplast2 == ".") { // a two digit IP
-    test = makeDigits(numberMatrix[iplast1.toInt()], test, 10, 0, false, dcolor);
-    test = makeDigits(numberMatrix[iplast0.toInt()], test, 17, 0, false, dcolor);
-  } else if (iplast1 == ".") { // a one digit ip
-    test = makeDigits(numberMatrix[iplast0.toInt()], test, 17, 0, false, dcolor);
-  }
-  else { // a 3 digit IP
-    test = makeDigits(numberMatrix[iplast2.toInt()], test, 10, 0, false, dcolor);
-    test = makeDigits(numberMatrix[iplast1.toInt()], test, 17, 0, false, dcolor);
-    test = makeDigits(numberMatrix[iplast0.toInt()], test, 24, 0, false, dcolor);
-  }
-  displayTimeNoAnimation(test);
+  while (counter < (textlentgh * 7 * 2)) {
+    EVERY_N_MILLISECONDS(80) {
+      
+      if (textScroller >= textlentgh * 7) {
+        textScroller = -34;
+      }
+      timeMatrix = showText(scrolltextip, CRGB::Red, textScroller);
+      bgMatrix = getBackgroundMap(timeMatrix);
+      bgMatrix = oneColorBackground(bgMatrix, CRGB::Black);  
+      textScroller++;
+      counter++;
+    }
+  mergeMapsToLeds(bgMatrix, timeMatrix, 128, 128, false, false);     // Merge both matrices. before we display.
   FastLED.show();
-  FastLED.delay(4000);
-
+  }
 }
 
 
@@ -311,6 +312,29 @@ void RunWebserver( void * parameter) {
       inputMessage = request->getParam("randomWhat")->value();
       preferences.putString("randomWhat", inputMessage);
       randomWhat = inputMessage;
+    }
+    else if (
+      request->hasParam("scrollspeed")) {
+      inputMessage = request->getParam("scrollspeed")->value();
+      preferences.putString("scrollspeed", inputMessage);
+      scrollspeed = inputMessage.toInt();
+    }
+    else if (
+      request->hasParam("restart")) {
+      inputMessage = "Restarting and useing new credentials";
+      ESP.restart();
+    }
+    else if (
+      request->hasParam("apikey")) {
+      inputMessage = request->getParam("apikey")->value();
+      preferences.putString("apikey", inputMessage);
+      apikey = inputMessage;
+    }
+    else if (
+      request->hasParam("city")) {
+      inputMessage = request->getParam("city")->value();
+      preferences.putString("city", inputMessage);
+      city = inputMessage;
     }
     else
     {

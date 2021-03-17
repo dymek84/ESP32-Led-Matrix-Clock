@@ -119,7 +119,7 @@ int numberMatrix[10][64] =                            // THIS WILL HOLD (DURING 
   }
 };
 
-int letterMatrix[41][64] =                            // THIS WILL HOLD (DURING SETUP) THE MATRIX CONTAINING ALL 8x8 LETTERS MAPPINGS
+int letterMatrix[42][64] =                            // THIS WILL HOLD (DURING SETUP) THE MATRIX CONTAINING ALL 8x8 LETTERS MAPPINGS
 {
   { // : (0)
     0, 0, 0, 0, 0, 0, 0, 0,
@@ -530,6 +530,16 @@ int letterMatrix[41][64] =                            // THIS WILL HOLD (DURING 
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
+  },
+   { // degree (41)
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 0, 0,
+    0, 0, 1, 0, 1, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0
   }
 };
 
@@ -599,7 +609,8 @@ std::map<String, int> charToInt = {
   {"7", 36},
   {"8", 37},
   {"9", 38},
-  {"@", 39},
+  {"@", 39}, // will show a heart
   {" ", 40},
+  {"'", 41}, // will show a degree
   {":", 0}
 };

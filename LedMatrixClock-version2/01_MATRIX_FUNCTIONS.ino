@@ -36,6 +36,9 @@ void getStoredParameters() {
   digitHTMLcol = preferences.getString("digitHTMLcol");
   BGHTMLcol = preferences.getString("BGHTMLcol");
   randomWhat = preferences.getString("randomWhat");
+  scrollspeed = preferences.getString("scrollspeed").toInt();
+  apikey = preferences.getString("apikey");
+  city = preferences.getString("city");
 
 
   digitColor = strtol(digitHTMLcol.substring(1).c_str(), NULL, 16);
@@ -156,11 +159,11 @@ void mergeMapsToLeds(std::map<int, CRGB> bg, std::map<int, CRGB> fg, int bgbrigh
 
 
 /*
- * This function takes a character of digit array [64], and maps the leds that should turn on, onto the matrix.
- * Input is the letter array (int[64], the matrix map<int, CRGB>, start x position of the cursor, start y position of the cursus. 
- * clear true/false determines if we want to empty our map befor filling it again., digitcolor is in case we fill it new we give eacht led a default color.
- * it returns the matrix map, with the led positions and color for further displaying.
- */
+   This function takes a character of digit array [64], and maps the leds that should turn on, onto the matrix.
+   Input is the letter array (int[64], the matrix map<int, CRGB>, start x position of the cursor, start y position of the cursus.
+   clear true/false determines if we want to empty our map befor filling it again., digitcolor is in case we fill it new we give eacht led a default color.
+   it returns the matrix map, with the led positions and color for further displaying.
+*/
 std::map<int, CRGB> makeDigits(int *letter, std::map<int, CRGB> digits, int x = 0, int y = 0,  boolean clear = false, CRGB digitColor = CRGB::Red) {
 
   if (clear) {
@@ -181,10 +184,10 @@ std::map<int, CRGB> makeDigits(int *letter, std::map<int, CRGB> digits, int x = 
           if (xyToLedStatus( dx, dy, letter) == 1 ) {             // xyToLedStatus will see in the character array a 1 (this led should be ON) or 0, this LED should be off
             int locationOnMatrix = xyToLedNumber(dx + x, dy + y);
             if (digits.find(locationOnMatrix) == digits.end()) {
-              if (useOld){
+              if (useOld) {
                 digits[locationOnMatrix] = leds[locationOnMatrix];                // new LED, give it a default color.
-              }else{
-                digits[locationOnMatrix] = digitColor;  
+              } else {
+                digits[locationOnMatrix] = digitColor;
               }
             } else {
               digits[locationOnMatrix] = leds[locationOnMatrix];     // LED already exists.. leave it.
@@ -197,6 +200,55 @@ std::map<int, CRGB> makeDigits(int *letter, std::map<int, CRGB> digits, int x = 
 
   return digits;
 } // makeDigits()
+
+
+/*
+   A function to get the current weather (forecast) from openweathermap
+   http://api.openweathermap.org/data/2.5/weather?q=Arnhem&appid=21631831883&units=metric
+*/
+String getTheWeather(String Endpoint, String APIKey, String City, String Units) {
+  String payload = {};
+
+  if ((WiFi.status() == WL_CONNECTED)) { //Check the current connection status
+    String endpointAndKey = "http://api.openweathermap.org/data/2.5/weather?q=" + City + "&appid=" + APIKey + "&units=" + Units;
+    HTTPClient http;
+    http.begin(endpointAndKey);
+    int httpCode = http.GET();  //Make the request
+
+    if (httpCode > 0) { //Check for the returning code
+      payload = http.getString();
+ //      Serial.println(httpCode);
+ //      Serial.println(payload);
+    }
+    else {
+      Serial.println("Error on HTTP request. No Weather data");
+      Serial.println(httpCode);
+    }
+    http.end(); //Free the resources
+  }
+  return payload;
+} //getTheWeather()
+
+/*
+ * This function will quickly parse JSON information. Often Weather data is multi level.
+ * Like firstlevel ["main"] and second level ["temp"] will get you the temperature
+ * provide the word "false" to secondlevel if there is no second level
+ */
+String returnFromJSON(String jsonBuffer, String jsonFirstLevel, String jsonSecondLevel ) {
+  String value = "error";
+  JSONVar myObject = JSON.parse(jsonBuffer);
+  if (JSON.typeof(myObject) == "undefined") {
+    Serial.println("Parsing Weather data JSON: input failed!");
+    return value;
+  }
+  if (jsonSecondLevel == "false"){
+    value = JSON.stringify(myObject[jsonFirstLevel]);
+  }else{
+    value = JSON.stringify(myObject[jsonFirstLevel][jsonSecondLevel]);
+  }
+ 
+ return value;
+} //returnfromJSON()
 
 /*
    Debug functions
