@@ -1,37 +1,37 @@
-const char INDEXAP_HTML[] =
-  "<!DOCTYPE HTML>"
-  "<html>"
-  "<head>"
-  "<meta content=\"text/html; charset=ISO-8859-1\""
-  " http-equiv=\"content-type\">"
-  "<meta name = \"viewport\" content = \"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">"
-  "<title>ESP8266 Web Form Demo</title>"
-  "<style>"
-  "\"body { background-color: #808080; font-family: Arial, Helvetica, Sans-Serif; Color: #000000; text-align:center;}\""
-  "</style>"
-  "</head>"
-  "<body>"
-  "<h3>Enter your WiFi credentials</h3>"
-  "<form action=\"/get\" target=\"hidden-form\">"
-  "<p>"
-  "<label>SSID:&nbsp;</label>"
-  "<input maxlength=\"30\" name=\"SSIDname\"><br>"
-  "<input type=\"submit\" value=\"Save\">"
-  "</form>"
-  "<form action=\"/get\" target=\"hidden-form\">"
-  "<label>Key:&nbsp;&nbsp;&nbsp;&nbsp;</label><input maxlength=\"30\" name=\"SSIDpwd\"><br>"
-  "<input type=\"submit\" value=\"Save\">"
-  "</p>"
-  "</form>"
-  "<form action=\"/get\" target=\"hidden-form\">"
-  "  Press this button to reboot with the new Password and SSID name<br />"
-  "  <input type=\"submit\" value=\"Reboot\">"
-  "  <br />"
-  "  </form>"
-  "<p> %wifilist% </p>"
-  "<iframe style=\"display:none\" name=\"hidden-form\"></iframe>"
-  "</body>"
-  "</html>";
+const char INDEXAP_HTML[] PROGMEM = R"rawliteral(
+  <!DOCTYPE HTML>
+  <html>
+  <head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name = "viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0">
+  <title>ESP32 Led Matrix Clock, update your, WIFI SETTINGS</title>
+  <style>
+  "body { background-color: #808080; font-family: Arial, Helvetica, Sans-Serif; Color: #000000; text-align:center;}"
+  </style>
+  </head>
+  <body>
+  <h3>Enter your WiFi credentials</h3>
+  <form action="/get" target="hidden-form">
+  <p>
+  <label>SSID:&nbsp;</label>
+  <input maxlength="30" name="SSIDname"><br>
+  <input type="submit" value="Save">
+  </form>
+  <form action="/get" target="hidden-form">
+  <label>Key: </label><input maxlength="30" name="SSIDpwd"><br>
+  <input type="submit" value="Save">
+  </p>
+  </form>
+  <form action="/get" target="hidden-form">
+    Press this button to reboot with the new Password and SSID name<br />
+    <input type="submit" value="Reboot">
+    <br />
+    </form>
+  <p></p>
+  <iframe style="display:none" name="hidden-form"></iframe>
+  </body>
+  </html>
+  )rawliteral";
 
 const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html><head>
@@ -80,7 +80,6 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       <select name="effect" id="effecten" onchange="this.form.submit()">
         <option value = "%effect%" selected> %effect% </option>
         <option value = "oneColorBackground">Fixed Background </option>
-        <option value = "rainbowCycle">Rainbow Background</option>
         <option value = "sparkle">Sparkle</option>
         <option value = "confetti">Confetti</option>
         <option value = "plasma">Plasma</option>
@@ -258,7 +257,7 @@ The nightmode can also be set to start and end between certain times.
      </form>
      </p>
      <form action="/get" target="hidden-form">
-  After provinding a SSID name and Password, you can click this button to retart the Clock. <br />
+ You can click this button to restart the Clock. <br />
   <input type="submit" name="restart" value="Restart clock" onclick="submitMessage()">
   <br />
   </form>

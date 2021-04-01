@@ -248,7 +248,7 @@ std::map<int, CRGB> showText(String text, CRGB dcolor = CRGB::Red, int scroller 
     it = charToInt.find(letter);
     if (it != charToInt.end()) {
       letterposinarray = it->second;
-      textmap =  makeDigits(letterMatrix[letterposinarray], textmap, position, 0, false, CRGB::Red);
+      textmap =  makeDigits(letterMatrix[letterposinarray], textmap, position, 0, false, dcolor);
       position = position + 7;
     }
   }

@@ -46,8 +46,8 @@ void RunAPmode( void * parameter) {
   AsyncWebServer server(80);
   WiFi.softAP(ssidAP, passwordAP);                                            // Start ACCESSPOINT MODE with basic credantials
   IPAddress IP = WiFi.softAPIP();                                             // GET THE ACCESSPOINT IP
-  Serial.print("The IP of the accesspoint is: ");                             // SHOW IP IN SERIAL MONITOR
-  Serial.println(WiFi.localIP());
+  Serial.println("The IP of the settings page is: 192.168.1.4");                             // SHOW IP IN SERIAL MONITOR
+  //Serial.println(WiFi.localIP());
   preferences.begin("wificreds", false);                                      // Make sure we have something to store our preferences in
   server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {              // The Home page so to say.
     request->send_P(200, "text/html", INDEXAP_HTML, processor);
@@ -68,7 +68,7 @@ void RunAPmode( void * parameter) {
       preferences.putString("password", inputMessage);
     }
     else {
-      inputMessage = "Restarting and usiing new credentials";
+      inputMessage = "Restarting and using new credentials";
       ESP.restart();
     }
     Serial.println(inputMessage);                                              // This prints the submitted variable on the serial monitor.. as a check
@@ -81,8 +81,9 @@ void RunAPmode( void * parameter) {
   for (;;) {
     preferences.begin("wificreds", false);
     delay(5000);
-    Serial.println(preferences.getString("ssid"));
-    Serial.println(preferences.getString("password"));
+    Serial.print(".");
+  //  Serial.println(preferences.getString("ssid"));
+  //  Serial.println(preferences.getString("password"));
     preferences.end();
   }
 }
@@ -173,7 +174,31 @@ void displayIP() {
   String scrolltextip = "ip: " + ip;
   int textlentgh = scrolltextip.length();
 
-  while (counter < (textlentgh * 7 * 2)) {
+  while (counter < (textlentgh * 10 * 2)) {
+    EVERY_N_MILLISECONDS(80) {
+      
+      if (textScroller >= textlentgh * 7) {
+        textScroller = -34;
+      }
+      timeMatrix = showText(scrolltextip, CRGB::Red, textScroller);
+      bgMatrix = getBackgroundMap(timeMatrix);
+      bgMatrix = oneColorBackground(bgMatrix, CRGB::Black);  
+      textScroller++;
+      counter++;
+    }
+  mergeMapsToLeds(bgMatrix, timeMatrix, 128, 128, false, false);     // Merge both matrices. before we display.
+  FastLED.show();
+  }
+}
+
+void displayIPAP() {
+  String ip = WiFi.localIP().toString();
+  int textScroller = -34;
+  int counter = 0;
+  String scrolltextip = "accesspoint ip: 192.168.4.1";
+  int textlentgh = scrolltextip.length();
+
+  while (counter < (textlentgh * 8 * 2)) {
     EVERY_N_MILLISECONDS(80) {
       
       if (textScroller >= textlentgh * 7) {

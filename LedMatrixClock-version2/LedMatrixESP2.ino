@@ -32,7 +32,7 @@
 */
 
 #define NUM_LEDS 256                                  // THE NUMBER OF LEDs USED IN THE MATRIX
-#define DATA_PIN 13                                   // ON WHICH PIN WILL THE DATA BE SEND
+#define DATA_PIN 2                                   // ON WHICH PIN WILL THE DATA BE SEND
 #define BRIGHTNESS 255                                // INITIAL BRIGHNESS OF THE MATRIX.
 #define VOLTAGE 5                                     // THE VOLTAGE OUR SYSTEM USES
 #define AMPS 5000                                     // THE CURRENT THAT YOUR POWERBRICK CAN DELIVER e.g 5 AMP (or 5000 mA)
@@ -53,8 +53,14 @@ const char* ssidAP = "ESP32-LedMatrixClock";          // IN CASE WE CANNOT CONNE
 const char* passwordAP = "1234abcd";                  // AND YOU CAN ACCESS THAT ACCESSPOINT USING THIS SIMPLE PASSWORD
 AsyncWebServer server(80);                            // Create AsyncWebServer object on port 80
 
+// Do you have a LDR (light dependent resistor installed? if so, which pin)
+const int sensorPin = 34;                             // AN LDR is installed on PIN 34. (10kOhm between GND and 3.3V on positive side)
+boolean useLDR = false;                                // THE LDR IS OPTIONAL, IT WILL BE USED TO CONTROL THE OVERALL BRIGHTNESS IS PRESENT
+int lightInit;                                        // initial value
+int lightVal;                                         // light reading
+
 // CLOCK&TIME SETTING
-const char* ntpServer = "nl.pool.ntp.org";             // THIS IS THE WEB ADDRESS OF THE EUROPEAN NETWORK TIME SERVER
+const char* ntpServer = "nl.pool.ntp.org";            // THIS IS THE WEB ADDRESS OF THE EUROPEAN NETWORK TIME SERVER
 const long  gmtOffset_sec = 3600;                     // WE LIVE IN THE NETHERLANDS => UTC+1H
 const int   daylightOffset_sec = 3600;                // YES THE NETHERLANDS IS STILL ON DAYLIGHT SAVINGS
 const char * defaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
@@ -75,6 +81,7 @@ extern CRGBPalette16 myRedWhiteBluePalette;           // AN IMPORTED COLOR PALET
 uint8_t backgroundBrightness = 128;                   // THE BACKGROUND BRIGHTNESS (ALL LEDS EXCEPT THE DIGITS)
 uint8_t digitBrightness = 128;                        // THE DIGIT BRIGHNESS (ALL LEDS EXCEPT THE BACKGROUND)
 uint8_t overAllBrightness = 128;                      // THE OVERALL BRIGHTNESS AFFECTS ALL LEDS.
+int ledClockBrightNess = 128;                               // IS USED TO SCALE THE LEDCLOCK WHEN A LDR IS USED
 boolean nightMode = false;                            // IS THE MATRIX IN NIGHT (BEDTIME) MODE
 boolean useOld = false;                               // WHEN TRUE THE TIMEMATIX WILL TAKE THE LEDs COLOR THAT WAS ALREADY THERE
 int scrollspeed = 150;                                // DEFAULT TEXT SCROLLING SPEED. LOWER IS FASTER. ITS DEFINED AS A STEP PER XX MILLISECONDS
@@ -236,6 +243,12 @@ void setup() {
   leds[0] = CRGB::Green;                                           // Make first led green to show matrix is on and running
   FastLED.show();
 
+  if (useLDR){                                                     // Here we start using or not the LDR
+    lightInit = analogRead(sensorPin);                             //we will take a single reading from the light sensor and store it in the lightCal variable. This will give us a prelinary value to compare against in the loop
+  }else{
+    lightInit = 0;
+  }
+
   /*
      Let's setup a wifi connection
      False: no wifi connection to router. If that is the case, we will setup an AP
@@ -249,6 +262,7 @@ void setup() {
   unsigned int counter =  preferences.getUInt("counter", 0);        // Counter to see how often we boot up
   preferences.getString("ssid");
   counter++;
+ 
   Serial.printf("Current restart counts: %u\n", counter);
   // Store the counter to the Preferences
   preferences.putUInt("counter", counter);
@@ -289,11 +303,12 @@ void setup() {
   while (!connectedToNetwork) {                                 // When we are not connected to a router (wifi point) we should not proceed. But only show the accesspoint website
     EVERY_N_SECONDS(30) {
       //Serial.println("ESP Matrix Clock is in AccessPoint mode. Please enter your SSID and Key in the Accesspoint website (connect to the AP-wifi first)");
-      leds[1] = CRGB::Orange;
-      FastLED.show();
-      FastLED.delay(1000);
-      leds[1] = CRGB::Red;
-      FastLED.show();
+      displayIPAP();
+      // leds[1] = CRGB::Orange;
+      // FastLED.show();
+      // FastLED.delay(1000);
+      // leds[1] = CRGB::Red;
+      // FastLED.show();
     }
   }
   configTzTime( defaultTimezone, ntpServer); //sets TZ and starts NTP sync
@@ -309,7 +324,7 @@ void setup() {
     ESP.restart();
   }
   preferences.end();                                                // You quit prefs for now.. need to open BEGIN it again when needed.
-  timeMatrix = getTimeMatrix(digitAnimation, CRGB::Black);          // This is the time matrix.. lets make sure it exsists
+  timeMatrix = getTimeMatrix("none", CRGB::Black);          // This is the time matrix.. lets make sure it exsists
   weatherJSON = getTheWeather(endpoint, apikey, city, units);       // Get the initial weather data
   Serial.println("Setup of matrixclock finished. Let's rock and roll");
   Serial.println(" ");
@@ -322,6 +337,31 @@ void setup() {
 */
 
 void loop() {
+  
+  EVERY_N_SECONDS(1){
+    if (useLDR){                                        // If we have a LDR, we can here 'read' the amount of light and adjust the overall brightness
+   //  Serial.println(analogRead(sensorPin));
+      int MeasuredValue = analogRead(sensorPin);
+      if (MeasuredValue > 4000){
+          ledClockBrightNess = overAllBrightness;
+      }
+      else if(MeasuredValue > 3000 && MeasuredValue <= 4000){
+          ledClockBrightNess = overAllBrightness * 3 / 4;
+      }
+      else if (MeasuredValue > 2000 && MeasuredValue <= 3000){
+          ledClockBrightNess = overAllBrightness / 2;
+      }
+      else if (MeasuredValue > 1000 && MeasuredValue <= 2000){
+          ledClockBrightNess = overAllBrightness / 4;
+      }
+       else if (MeasuredValue >= 0 && MeasuredValue <= 1000){
+          ledClockBrightNess = overAllBrightness / 5;
+      }
+     //ledClockBrightNess = overAllBrightness;
+   }else{
+     ledClockBrightNess = overAllBrightness;
+   }
+  }
 
   String activity = whichFX;                          // Default animation
   String digitActivity = digitAnimation;               // Default animation of digits
@@ -330,7 +370,7 @@ void loop() {
   boolean bgToBlack = false;                           // if background dimmming is a fade to black or not
   boolean fgToBlack = false;                          // if digits (foreground) dimming is a fade to black of not
 
-  FastLED.setBrightness(overAllBrightness);           // SET the MAtrix brightness to the global setting
+  FastLED.setBrightness(ledClockBrightNess);           // SET the MAtrix brightness to the global setting
 
 
   EVERY_N_MILLISECONDS(500) {                         // update the global time variables
@@ -421,7 +461,7 @@ void loop() {
 
   if ( nightMode ) {                                                  // If the clock is in Nightmode, we don't need much logic. only display the digits in faint red.
     FastLED.setBrightness(96);                                       // lower the brightness of the matrix
-    timeMatrix = getTimeMatrix(digitAnimation, CHSV(0, 255, 32));     // This is the time matrix.. letters are red and faint (32)
+    timeMatrix = getTimeMatrix("none", CHSV(0, 255, 32));     // This is the time matrix.. letters are red and faint (32)
     bgMatrix = getBackgroundMap(timeMatrix);                          // We need a background matrix as well..  default
     bgMatrix = oneColorBackground(bgMatrix, CRGB::Black);          // And we will give it a black background.
     bgBrightness = 255;
@@ -436,17 +476,18 @@ void loop() {
     } else {
       useOld = false;
     }
-    timeMatrix = getTimeMatrix(digitAnimation, digitColor);
+
+//    timeMatrix = getTimeMatrix("none", digitColor);
 
     if (activity == "dotsBeat") {
-      //  timeMatrix = getTimeMatrix(digitAnimation, digitColor);
+      timeMatrix = getTimeMatrix(digitAnimation, digitColor);
       bgMatrix = getBackgroundMap(timeMatrix);
       bgMatrix = dot_beat(bgMatrix);
       bgBrightness = 0;
       //  mergeMapsToLeds(bgMatrix, timeMatrix, backgroundBrightness, digitBrightness);
     }
     else if (activity == "oneColorBackground") {
-      //    timeMatrix = getTimeMatrix(digitAnimation, digitColor);           // This is the time matrix.. letters are red and faint (32)
+      timeMatrix = getTimeMatrix(digitAnimation, digitColor);           // This is the time matrix.. letters are red and faint (32)
       bgMatrix = getBackgroundMap(timeMatrix);                          // We need a background matrix as well..  default
       bgMatrix = oneColorBackground(bgMatrix, backgroundColor);         // And we will give it a black background.
 
@@ -454,7 +495,7 @@ void loop() {
     else if (activity == "plasma") {
       currentPalette = RainbowColors_p;
       EVERY_N_MILLISECONDS(50) {                                        // FastLED based non-blocking delay to update/display the sequence.
-        //    timeMatrix = getTimeMatrix(digitAnimation, digitColor);         // This is the time matrix.. letters are red and faint (32)
+        timeMatrix = getTimeMatrix(digitAnimation, digitColor);         // This is the time matrix.. letters are red and faint (32)
         bgMatrix = getBackgroundMap(timeMatrix);                        // We need a background matrix as well..  default
         bgMatrix =  plasma(bgMatrix, false);
 
@@ -467,6 +508,7 @@ void loop() {
     else if (activity == "rainbowWaves") {
       currentPalette = RainbowColors_p;
       EVERY_N_MILLISECONDS(5) {
+        timeMatrix = getTimeMatrix(digitAnimation, digitColor);
         bgMatrix = getBackgroundMap(timeMatrix);
         bgMatrix = beatWave(bgMatrix);
       }
@@ -479,6 +521,7 @@ void loop() {
       }
     }
     else if (activity == "Sweep") {
+      timeMatrix = getTimeMatrix("none", digitColor);
       currentPalette = RainbowColors_p;
       currentBlending = LINEARBLEND;
 
@@ -501,7 +544,7 @@ void loop() {
       bgToBlack = true;
 
     } else if (activity == "ripples") {
-
+      timeMatrix = getTimeMatrix("none", digitColor);
       currentPalette2 = OceanColors_p;                                           // Use palettes instead of direct CHSV or CRGB assignments
       targetPalette2 = RainbowColors_p;                                          // Also support smooth palette transitioning
       EVERY_N_MILLISECONDS(50) {                                                      // Smooth palette transitioning runs continuously.
@@ -519,15 +562,21 @@ void loop() {
       bgToBlack = true;
     }
     else if (activity == "showText") {
-      // is the text longer then 4 characters? if so, we need to scroll.
-      // Add the time to the scroller
-      //Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-      String tijd = String(Hour) + ":" + String(Minute);
+
+      if (digitActivity == "Sparkle") {
+        digitActivity = "No animation";
+      } else if (digitActivity == "Sweep") {
+        digitActivity = "No animation";
+      }
+
+      String minuten = String(Minute);
+      if (minuten.length() < 2) {
+        minuten = "0" + minuten;
+      }
+      String tijd = String(Hour) + ":" + minuten;
       String newScrolltext = tijd + " - " + scrolltext;
       int textlength = newScrolltext.length();
-      if (digitActivity == "Sparke" || digitActivity == "Sweep") {        // These just don't work with scrolling text
-        digitActivity == "No animation";
-      }
+
       EVERY_N_MILLISECONDS(scrollspeed) {
         textScroller++;
         if (textScroller >= textlength * 7) {
@@ -537,33 +586,48 @@ void loop() {
         bgMatrix = getBackgroundMap(timeMatrix);
         bgMatrix = oneColorBackground(bgMatrix, backgroundColor);         // And we will give it a black background.
       }
-      //digitActivity = "Rainbow";
+
     }
     else if (activity == "showWeather") {
-      EVERY_N_SECONDS(60) {
-        weatherJSON = getTheWeather(endpoint, apikey, city, units);
+
+      if (digitActivity == "Sparkle") {
+        digitActivity = "No animation";
+      } else if (digitActivity == "Sweep") {
+        digitActivity = "No animation";
       }
+
       String tempOutside = returnFromJSON(weatherJSON, "main", "temp");
       String maxtempOutside = returnFromJSON(weatherJSON, "main", "temp_max");
       String mintempOutside = returnFromJSON(weatherJSON, "main", "temp_min");
-      String textForDisplay = "Now: " + tempOutside + "C'"+ " Max: "+maxtempOutside+"C' Min: "+mintempOutside+"C'";
+      String textForDisplay = " " + tempOutside + "'C" + " ^" + maxtempOutside + "'C %" + mintempOutside + "'C";
       String minuten = String(Minute);
 
-      if (minuten.length() < 2){
-        minuten = "0"+minuten;
+      EVERY_N_SECONDS(60) {
+        weatherJSON = getTheWeather(endpoint, apikey, city, units);        
+        tempOutside = returnFromJSON(weatherJSON, "main", "temp");
+     
+        maxtempOutside = returnFromJSON(weatherJSON, "main", "temp_max");
+        mintempOutside = returnFromJSON(weatherJSON, "main", "temp_min");
+        
+        textForDisplay = " " + tempOutside + "'C" + " ^" + maxtempOutside + "'C %" + mintempOutside + "'C";
+        minuten = String(Minute);
+      }
+
+      if (minuten.length() < 2) {
+        minuten = "0" + minuten;
       }
       String tijd = String(Hour) + ":" + minuten;
       textForDisplay = tijd + " - " + textForDisplay;
 
       int textlength = textForDisplay.length();
-      if (digitActivity == "Sparke" || digitActivity == "Sweep") {        // These just don't work with scrolling text
-        digitActivity == "No animation";
-      }
+
+
       EVERY_N_MILLISECONDS(scrollspeed) {
         textScroller++;
         if (textScroller >= textlength * 7) {
           textScroller = -34;
         }
+       // timeMatrix.clear();
         timeMatrix = showText(textForDisplay, digitColor, textScroller);
         bgMatrix = getBackgroundMap(timeMatrix);
         bgMatrix = oneColorBackground(bgMatrix, backgroundColor);         // And we will give it a black background.
@@ -571,6 +635,7 @@ void loop() {
       //digitActivity = "Rainbow";
     }
     else if (activity == "sparkle") {
+      timeMatrix = getTimeMatrix("none", digitColor);
       bgMatrix = getBackgroundMap(timeMatrix);
       bgMatrix = oneColorBackground(bgMatrix, backgroundColor);
       EVERY_N_MILLIS(10) {
@@ -588,6 +653,7 @@ void loop() {
       }
     }
     else if (activity == "confetti") {
+      timeMatrix = getTimeMatrix("none", digitColor);
       currentPalette = RainbowColors_p;
       EVERY_N_MILLISECONDS(5) {                           // FastLED based non-blocking delay to update/display the sequence.
         bgMatrix = getBackgroundMap(timeMatrix);
@@ -597,7 +663,7 @@ void loop() {
       bgToBlack = true;
     }
     else {
-      //   timeMatrix = getTimeMatrix(digitAnimation, digitColor);           // This is the time matrix.. letters are red and faint (32)
+      timeMatrix = getTimeMatrix(digitAnimation, digitColor);           // This is the time matrix.. letters are red and faint (32)
       bgMatrix = getBackgroundMap(timeMatrix);                          // We need a background matrix as well..  default
       bgMatrix = oneColorBackground(bgMatrix, backgroundColor);         // And we will give it a black background.
     }
@@ -670,7 +736,7 @@ void loop() {
       }
     }
     else if (digitActivity == "No animation") {
-      timeMatrix = recolorDigits(timeMatrix, digitColor);
+     // timeMatrix = recolorDigits(timeMatrix, digitColor);
       fgToBlack = false;
     }
     else if (digitActivity == "Dark digits") {
@@ -679,7 +745,7 @@ void loop() {
     }
 
     else { // no digit animation.. just get the time Matrix
-      timeMatrix = getTimeMatrix(digitAnimation, CRGB::White);
+      timeMatrix = getTimeMatrix("none", CRGB::White);
       fgToBlack = false;
     }
     mergeMapsToLeds(bgMatrix, timeMatrix, bgBrightness, fgBrightness, bgToBlack, fgToBlack);     // Merge both matrices. before we display.

@@ -238,7 +238,7 @@ String returnFromJSON(String jsonBuffer, String jsonFirstLevel, String jsonSecon
   String value = "error";
   JSONVar myObject = JSON.parse(jsonBuffer);
   if (JSON.typeof(myObject) == "undefined") {
-    Serial.println("Parsing Weather data JSON: input failed!");
+   // Serial.println("Parsing Weather data JSON: input failed!");
     return value;
   }
   if (jsonSecondLevel == "false"){

@@ -68,13 +68,16 @@ std::map<int, CRGB> getTimeMatrix(String animation = "none", CRGB dcolor = CRGB:
 
   // Two dots in the middle
   if ((Seconde & 1) == 0) {                                                            // Make the dots blink.. check if seconds is even or odd
+  //  Serial.println("tik");
     test = makeDigits(letterMatrix[0], test, 12, 0, false, dcolor);
   } else {
-    if (animation == "dotanimation-inoutmatrix"){
-      // do not add dots to matrix when not shown.. so they can't be animated
+ //   Serial.println("tok");
+    test = makeDigits(letterMatrix[0], test, 12, 0, false, CHSV(0,0,0));
+   /* if (animation == "dotanimation-inoutmatrix"){
+      test = makeDigits(letterMatrix[0], test, 12, 0, false, CHSV(0,0,0));
     }else{
       test = makeDigits(letterMatrix[0], test, 12, 0, false, CHSV(0,0,0));
-    }
+    }*/
   }
   
    
