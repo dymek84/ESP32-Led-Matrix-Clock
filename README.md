@@ -80,14 +80,17 @@ There are so many things I want to do. But for now this is my action list.
 - Characters can now only be placed based on X position, not Y position yet.
 - DONE: Add photo's to this page
 - IMPLEMENTED: a more simple method to animate background and foreground without them inteferring..(most of the time).
+- IMPLEMENTED: Light Dependent Resistor input to automticallt accomodate the brightness of the matrix to the ambient brightness
+ 
 
 -- ISSUE (or not): When background is fade-down, some animations will not look as good. As a fix some background cannot be faded (even if you set it to fade) the only dimming that will always work is the overall brightness (dimming). 
 -- The code for this version 2.0 is way more structured. But still at some points spaghetti.. but its faster and easier to read (more comments inline) and better use of functions().
 
 # Wires and schema's
-<img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/ESP-schema.png?raw=true" width="400">
+<img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/Schema-LEDMatrix.png?raw=true" width="400">
 In the (bad) photo you see how I soldered everyting on a soldering breadboard. (5cm x 7 cm). 
-On the ESP32 I soldered pins on the ground, Pin2 and 5V places. And on the right side row two pins, one on the top and one on the bottom of the outer rows. Note: Pin2 was used in version 1, for version 2 I used pin 13. You can still use 2 of any other pin, just set it correct in the code!! #define DATA_PIN .. (where .. is your data pin number)
+On the ESP32 I soldered pins on the ground, Pin2 and 5V places. And on the right side row two pins, one on the top and one on the bottom of the outer rows. Note: Pin2 was used in version 1, for version 2 I used pin 18. You can still use 2, 18 or any other pin, just set it correct in the code!! #define DATA_PIN .. (where .. is your data pin number)
+Also, now I have added a Light Dependent Resistor, on PIN 34 (again, you can choose something else). It enables the matrix to adjust the brightness according to the ambient brightness. Its based on a voltage devider schema. Resistance of the photoresistor is typically less than 80 Ohms (< 80Ω) in full light and Dark resistance is typically greater than 20 Meg Ohms (> 20MΩ) – when the photoresistor is in full darkness. IMPORTANT: You need to drill a hole in the enclosure of the CPU-holder to fit the LDR through!
 ((Pins, also called male Pin Header, <img src="https://github.com/bvanbreukelen/ESP32-Led-Matrix-Clock/blob/main/pictures/Screenshot%202021-02-11%20at%2015.35.48.png" width="100"> you can break of seperate pins ;
 This makes a square of pins. In this way every corner connects to the sockets on the breadboard and this makes it more stable.
 On the soldering breadbord I soldered the sockets/connectors. This makes the ESP32 plug and play in case you want to add, change stuff.
