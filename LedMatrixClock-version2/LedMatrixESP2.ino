@@ -55,7 +55,7 @@ AsyncWebServer server(80);                            // Create AsyncWebServer o
 
 // Do you have a LDR (light dependent resistor installed? if so, which pin)
 const int sensorPin = 34;                             // AN LDR is installed on PIN 34. (10kOhm between GND and 3.3V on positive side)
-boolean useLDR = false;                                // THE LDR IS OPTIONAL, IT WILL BE USED TO CONTROL THE OVERALL BRIGHTNESS IS PRESENT
+boolean useLDR = true;                                // THE LDR IS OPTIONAL, IT WILL BE USED TO CONTROL THE OVERALL BRIGHTNESS IS PRESENT
 int lightInit;                                        // initial value
 int lightVal;                                         // light reading
 
@@ -95,7 +95,9 @@ String digitAnimation = "Aan";                         // Aan (=On) means, digit
 int iRebooted = 0;
 int Seconde;
 int Minute;
+int OldMinute;
 int Hour;
+int OldHour;
 int Day;
 int Month;
 int Year;
@@ -392,7 +394,7 @@ void loop() {
   };
 
 
-  EVERY_N_SECONDS(60) {                               // Every minute we we generate a random number, which is the random animation we will show.
+  EVERY_N_SECONDS(90) {                               // Every 90seconds we we generate a random number, which is the random animation we will show.
     randomNumber = rand() % arrlength;
     randomDigitNumber = rand() % arrl;
   }
@@ -689,6 +691,7 @@ void loop() {
       }
 
     } else if (digitActivity == "Rainbow") {
+      currentPalette = RainbowColors_p;
       timeMatrix = beatWave(timeMatrix);
       if (activity != "rainbowWaves") {                                  // in case the activity is also rainbowWaves for the background, we can skip this
         EVERY_N_MILLISECONDS(100) {

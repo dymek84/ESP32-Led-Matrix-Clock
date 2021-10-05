@@ -65,17 +65,85 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   background: #4CAF50;
   cursor: pointer;
 }
+
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
 </style>
 
-  <title>ESP32 Led Matrix Clock</title>
+  <title>Led Matrix Clock</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
       alert("Restarting ESP");
       setTimeout(function(){ document.location.reload(false); }, 500);   
     }
+    function openCity(evt, cityName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
   </script></head><body>
-  <form action="/get" target="hidden-form">
+
+  <div class="tab">
+    <button class="tablinks" onclick="openCity(event, 'Animation')" id="defaultOpen">>Animation</button>
+    <button class="tablinks" onclick="openCity(event, 'Brightness')">Brightness</button>
+    <button class="tablinks" onclick="openCity(event, 'Sleepmode')">Sleepmode</button>
+     <button class="tablinks" onclick="openCity(event, 'Other')">Other</button>
+  </div>  
+  <!-- Tab content -->
+  
+  <div id="Animation" class="tabcontent">
+    <h3>London</h3>
+     <form action="/get" target="hidden-form">
     Choose your background animation. The current effect: - %effect% <br />
       <select name="effect" id="effecten" onchange="this.form.submit()">
         <option value = "%effect%" selected> %effect% </option>
@@ -141,8 +209,10 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     <input type="color" id="colorpicker2" name="inputBGCol" value ="%BGHTMLcol%">
     <input type="submit" value="Submit">
    </form><br />
+  </div>
 
-
+  <div id="Brightness" class="tabcontent">
+    <h3>Brightness</h3>
      <form action="/get" target="hidden-form">
      <p> Overall Brightness of the Matrix <br />
      <div class="slidecontainer">
@@ -151,6 +221,12 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
       </div>
      </form>
      </p>
+
+     
+     <p> If your matrix is equiped with a Light Dependent resistor, it can automatically dim or brigthen the led's based on the ambient light<br />
+     The current ambient strength of the light is (measured between 0 min to 4095 max): <br />
+     Current ambient light level: %LDR% <br/>
+    
 
       <form action="/get" target="hidden-form">
      <p> Background Brightness (does not apply to all animations) <br />
@@ -170,7 +246,11 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
      </form>
      </p>
    
-   <form action="/get" target="hidden-form">
+  </div>
+
+<div id="Sleepmode" class="tabcontent">
+  <h3>Sleepmode</h3>
+  <form action="/get" target="hidden-form">
    Manual nightmode:<br />
     <select name="nightMode" id="nachtstand" onchange="this.form.submit()">
       <option value="%nightMode%" selected> %nightMode% </option>
@@ -262,7 +342,11 @@ The nightmode can also be set to start and end between certain times.
   <br />
   </form>
   <br />
-  <h3> Weather data </h3>
+</div>
+  
+  <div id="Other" class="tabcontent">
+  <h3> Other </h3>
+   <h3> Weather data </h3>
   The clock can also show weather data. But it needs some settings for this. <br/>
   You need a openweathermap account (https://openweathermap.org). From your account you need to go to My API keys (https://home.openweathermap.org/api_keys) and create a new key. <br/>
   This key you need to enter here:
@@ -277,12 +361,18 @@ The nightmode can also be set to start and end between certain times.
         <input type="text" id="city" name="city" value ="%city%">
         <input type="submit" value="Submit" >
       </form> <br />
-      
+   </div>   
   
     <iframe style="display:none" name="hidden-form"></iframe>
     <br /> Made by Bas van Breukelen (c) 2021 
   <br /> This matrix has rebooted: %iRebooted% times since first installing Led-Clock <br />
-</body></html>)rawliteral";
+</body>
+<script>
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
+
+</html>)rawliteral";
 
 // Webpage that is served when ESP is in case accessmode:
 const char index2_html[] PROGMEM = R"rawliteral(
@@ -311,6 +401,6 @@ const char index2_html[] PROGMEM = R"rawliteral(
   <input type="submit" value="Restart clock" onclick="submitMessage()">
   <br />
   </form>
-  
+  </div>
   <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";

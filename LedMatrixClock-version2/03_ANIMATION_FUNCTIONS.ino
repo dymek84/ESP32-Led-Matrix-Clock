@@ -255,6 +255,7 @@ std::map<int, CRGB> showText(String text, CRGB dcolor = CRGB::Red, int scroller 
   return textmap;
 }
 
+
 /*
     intput is the time (minutes) we need to check. output is if a random animation should run.
 */

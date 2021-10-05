@@ -44,9 +44,9 @@ String scanNetworks() {
 void RunAPmode( void * parameter) {
   WiFi.disconnect(true);                                                      // End All connections.
   AsyncWebServer server(80);
-  WiFi.softAP(ssidAP, passwordAP);                                            // Start ACCESSPOINT MODE with basic credantials
+  WiFi.softAP(ssidAP, passwordAP);                                            // Start ACCESSPOINT MODE with basic credentials
   IPAddress IP = WiFi.softAPIP();                                             // GET THE ACCESSPOINT IP
-  Serial.println("The IP of the settings page is: 192.168.1.4");                             // SHOW IP IN SERIAL MONITOR
+  Serial.println("The IP of the settings page is: 192.168.4.1");              // SHOW IP IN SERIAL MONITOR
   //Serial.println(WiFi.localIP());
   preferences.begin("wificreds", false);                                      // Make sure we have something to store our preferences in
   server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {              // The Home page so to say.
@@ -82,8 +82,8 @@ void RunAPmode( void * parameter) {
     preferences.begin("wificreds", false);
     delay(5000);
     Serial.print(".");
-  //  Serial.println(preferences.getString("ssid"));
-  //  Serial.println(preferences.getString("password"));
+    //  Serial.println(preferences.getString("ssid"));
+    //  Serial.println(preferences.getString("password"));
     preferences.end();
   }
 }
@@ -156,6 +156,16 @@ String processor(const String & var) {
   else if (var == "apikey") {
     return String(apikey);
   }
+  else if (var == "LDR") {
+    int MeasuredValue = 0;
+    if (useLDR) {
+      MeasuredValue = analogRead(sensorPin);
+      Serial.println(MeasuredValue);
+    } else {
+      MeasuredValue = 0;
+    }
+    return String(MeasuredValue);
+  }
   return String();
 }
 
@@ -176,18 +186,18 @@ void displayIP() {
 
   while (counter < (textlentgh * 10 * 2)) {
     EVERY_N_MILLISECONDS(80) {
-      
+
       if (textScroller >= textlentgh * 7) {
         textScroller = -34;
       }
       timeMatrix = showText(scrolltextip, CRGB::Red, textScroller);
       bgMatrix = getBackgroundMap(timeMatrix);
-      bgMatrix = oneColorBackground(bgMatrix, CRGB::Black);  
+      bgMatrix = oneColorBackground(bgMatrix, CRGB::Black);
       textScroller++;
       counter++;
     }
-  mergeMapsToLeds(bgMatrix, timeMatrix, 128, 128, false, false);     // Merge both matrices. before we display.
-  FastLED.show();
+    mergeMapsToLeds(bgMatrix, timeMatrix, 128, 128, false, false);     // Merge both matrices. before we display.
+    FastLED.show();
   }
 }
 
@@ -200,18 +210,18 @@ void displayIPAP() {
 
   while (counter < (textlentgh * 8 * 2)) {
     EVERY_N_MILLISECONDS(80) {
-      
+
       if (textScroller >= textlentgh * 7) {
         textScroller = -34;
       }
       timeMatrix = showText(scrolltextip, CRGB::Red, textScroller);
       bgMatrix = getBackgroundMap(timeMatrix);
-      bgMatrix = oneColorBackground(bgMatrix, CRGB::Black);  
+      bgMatrix = oneColorBackground(bgMatrix, CRGB::Black);
       textScroller++;
       counter++;
     }
-  mergeMapsToLeds(bgMatrix, timeMatrix, 128, 128, false, false);     // Merge both matrices. before we display.
-  FastLED.show();
+    mergeMapsToLeds(bgMatrix, timeMatrix, 128, 128, false, false);     // Merge both matrices. before we display.
+    FastLED.show();
   }
 }
 
@@ -360,6 +370,17 @@ void RunWebserver( void * parameter) {
       inputMessage = request->getParam("city")->value();
       preferences.putString("city", inputMessage);
       city = inputMessage;
+    }
+    else if (
+      request->hasParam("LDR")) {
+      int MeasuredValue = 0;
+      if (useLDR) {
+        MeasuredValue = analogRead(sensorPin);
+        Serial.println(MeasuredValue);
+      } else {
+        MeasuredValue = 0;
+      }
+      inputMessage =  MeasuredValue;
     }
     else
     {
