@@ -81,6 +81,7 @@ There are so many things I want to do. But for now this is my action list.
 - DONE: Add photo's to this page
 - IMPLEMENTED: a more simple method to animate background and foreground without them inteferring..(most of the time).
 - IMPLEMENTED: Light Dependent Resistor input to automticallt accomodate the brightness of the matrix to the ambient brightness
+- IMPLEMENTED: New animation. Now when a minute or hour has passed the corresponding digit scrolls down and is replaced by a new digit.
  
 
 -- ISSUE (or not): When background is fade-down, some animations will not look as good. As a fix some background cannot be faded (even if you set it to fade) the only dimming that will always work is the overall brightness (dimming). 
