@@ -5,6 +5,7 @@
     Maybe lets not use SPIFFS but preferences!!
 */
 void getStoredParameters() {
+  Serial.println();
   Serial.println("Update all global parameters with stored info");
 
   /* LETS USE PREFERENCES LIBRARY */
@@ -39,6 +40,13 @@ void getStoredParameters() {
   scrollspeed = preferences.getString("scrollspeed").toInt();
   apikey = preferences.getString("apikey");
   city = preferences.getString("city");
+  ldrpin = preferences.getString("ldrpin").toInt();
+  ledpin = preferences.getString("ledpin").toInt();
+  animatechange = preferences.getString("animatechange");
+  if (ldrpin == 0){
+    Serial.println("LDR not used");
+    useLDR=false;
+  }
 
 
   digitColor = strtol(digitHTMLcol.substring(1).c_str(), NULL, 16);
@@ -46,8 +54,12 @@ void getStoredParameters() {
   Serial.print("Last selected animation: "); Serial.println(whichFX);
   Serial.print("When playing random animations we animate: "); Serial.println(randomWhat);
   Serial.print("Digit animation: "); Serial.println(digitAnimation);
+  Serial.print("Animate hours and minutes: "); Serial.println(animatechange);
   Serial.print("Background brightness: "); Serial.println(backgroundBrightness);
+  Serial.print("The matrix data_pin: "); Serial.println(ledpin);
+  Serial.print("The LDR pin: "); Serial.println(ldrpin);
   Serial.println("Loading settings done");
+  Serial.println();
   preferences.end();
 
 }
@@ -179,7 +191,7 @@ std::map<int, CRGB> makeDigits(int *letter, std::map<int, CRGB> digits, int x = 
 
     for (int dy = 0; dy < 8; dy++) {                              // dy is the row position in the character array
       for (int dx = 0; dx < 8; dx++) {                            // dx is the column x position in the character array all translated to a int[64] array (1 dimentional)
-        if ((dx + x) <= (XRES - 1) && (dy + y) <= (YRES - 1) && (x + dx) >= 0) {     // check if this LED position is still on the matrix, if not, no need to continue
+        if ((dx + x) <= (XRES - 1) && (dy + y) <= (YRES - 1) && (x + dx) >= 0 && (y + dy) >= 0 ) {     // check if this LED position is still on the matrix, if not, no need to continue
           // ok not on matrix
           if (xyToLedStatus( dx, dy, letter) == 1 ) {             // xyToLedStatus will see in the character array a 1 (this led should be ON) or 0, this LED should be off
             int locationOnMatrix = xyToLedNumber(dx + x, dy + y);

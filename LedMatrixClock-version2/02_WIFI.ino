@@ -166,6 +166,15 @@ String processor(const String & var) {
     }
     return String(MeasuredValue);
   }
+  else if (var == "ldrpin") {
+    return String(ldrpin);
+  }
+  else if (var == "ledpin") {
+    return String(ledpin);
+  }
+  else if (var == "animatechange") {
+    return String(animatechange);
+  }
   return String();
 }
 
@@ -381,6 +390,24 @@ void RunWebserver( void * parameter) {
         MeasuredValue = 0;
       }
       inputMessage =  MeasuredValue;
+    }
+    else if (
+      request->hasParam("ldrpin")) {
+      inputMessage = request->getParam("ldrpin")->value();
+      preferences.putString("ldrpin", inputMessage);
+      ldrpin = inputMessage.toInt();
+    }
+    else if (
+      request->hasParam("ledpin")) {
+      inputMessage = request->getParam("ledpin")->value();
+      preferences.putString("ledpin", inputMessage);
+      ledpin = inputMessage.toInt();
+    }
+    else if (
+      request->hasParam("animatechange")) {
+      inputMessage = request->getParam("animatechange")->value();
+      preferences.putString("animatechange", inputMessage);
+      animatechange = inputMessage;
     }
     else
     {

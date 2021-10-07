@@ -32,7 +32,9 @@
 */
 
 #define NUM_LEDS 256                                  // THE NUMBER OF LEDs USED IN THE MATRIX
-#define DATA_PIN 2                                   // ON WHICH PIN WILL THE DATA BE SEND
+#define DATA_PIN2 2                                    // ON WHICH PIN WILL THE DATA BE SEND
+#define DATA_PIN12 12
+#define DATA_PIN18 18
 #define BRIGHTNESS 255                                // INITIAL BRIGHNESS OF THE MATRIX.
 #define VOLTAGE 5                                     // THE VOLTAGE OUR SYSTEM USES
 #define AMPS 5000                                     // THE CURRENT THAT YOUR POWERBRICK CAN DELIVER e.g 5 AMP (or 5000 mA)
@@ -58,6 +60,10 @@ const int sensorPin = 34;                             // AN LDR is installed on 
 boolean useLDR = true;                                // THE LDR IS OPTIONAL, IT WILL BE USED TO CONTROL THE OVERALL BRIGHTNESS IS PRESENT
 int lightInit;                                        // initial value
 int lightVal;                                         // light reading
+
+// pins settings from wifi
+int ledpin = 0;                                // We can use preferences to set the PINS to some other setting.
+int ldrpin = sensorPin;
 
 // CLOCK&TIME SETTING
 const char* ntpServer = "nl.pool.ntp.org";            // THIS IS THE WEB ADDRESS OF THE EUROPEAN NETWORK TIME SERVER
@@ -94,6 +100,7 @@ boolean EveningSleep = false;
 String digitAnimation = "Aan";                         // Aan (=On) means, digits are visible. (Uit is OFF and Regenboog is rainbow fx)
 int iRebooted = 0;
 int Seconde;
+int OldSeconde;
 int Minute;
 int OldMinute;
 int Hour;
@@ -101,6 +108,18 @@ int OldHour;
 int Day;
 int Month;
 int Year;
+boolean timeChangeAnimation = false;                   // Animate the time change...
+int yloc = 0;                                          // y location general counter
+int ylocmin = 0;                                       // y location for upscrolling time minutes
+int ylochour = 0;                                      // y location for upscrolling hours
+String animatechange = "Yes";                          // do we want to use this animation
+boolean tenminuteJump = false;                         // every 10 minutes we need to move 2 digits!
+boolean hourjump = false;                              // 10 hours we need to move 2 digits
+int ydigit1 = 0;
+int ydigit2 = 0;
+boolean hourhaschanged = false;
+int hydigit1 = 0;
+int hydigit2 = 0;
 
 String endpoint = "http://api.openweathermap.org/data/2.5/weather?q=";
 String city = "Arnhem";                                             // This needs to be set via the webinterface.
@@ -236,8 +255,23 @@ void setup() {
   Serial.println("Starting LED MATRIX CLOCK (c) BvB2021 ");
   Serial.print("Setup runs on core: "); Serial.println(xPortGetCoreID());
   getStoredParameters();                                           // MAKE SURE WE LOAD IN ALL OUR SETTINGS TO THE GLOBALS. (might replace with Preferences lib).
+  if (ledpin == 0) {
+    ledpin = 2; // DATA_PIN;
+  }
+  const int pin = ledpin;
   makeXYMatrix();                                                  // make LedMartrixWithXY coordinates
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+  if (ledpin == 2) {
+    FastLED.addLeds<WS2812B, DATA_PIN2, GRB>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+  } else if (ledpin == 12) {
+    FastLED.addLeds<WS2812B, DATA_PIN12, GRB>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+  } else if (ledpin == 18) {
+    FastLED.addLeds<WS2812B, DATA_PIN18, GRB>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+  } else {
+    FastLED.addLeds<WS2812B, DATA_PIN2, GRB>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+  }
+
+
+  // FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
   FastLED.setDither(0);
   FastLED.setMaxPowerInVoltsAndMilliamps(VOLTAGE, AMPS);           // set limit to aamount of AMPs we use..
   FastLED.setBrightness(overAllBrightness);                        // set the initial brightness off the whole matrix.
@@ -245,9 +279,9 @@ void setup() {
   leds[0] = CRGB::Green;                                           // Make first led green to show matrix is on and running
   FastLED.show();
 
-  if (useLDR){                                                     // Here we start using or not the LDR
+  if (useLDR) {                                                    // Here we start using or not the LDR
     lightInit = analogRead(sensorPin);                             //we will take a single reading from the light sensor and store it in the lightCal variable. This will give us a prelinary value to compare against in the loop
-  }else{
+  } else {
     lightInit = 0;
   }
 
@@ -264,7 +298,7 @@ void setup() {
   unsigned int counter =  preferences.getUInt("counter", 0);        // Counter to see how often we boot up
   preferences.getString("ssid");
   counter++;
- 
+
   Serial.printf("Current restart counts: %u\n", counter);
   // Store the counter to the Preferences
   preferences.putUInt("counter", counter);
@@ -330,6 +364,8 @@ void setup() {
   weatherJSON = getTheWeather(endpoint, apikey, city, units);       // Get the initial weather data
   Serial.println("Setup of matrixclock finished. Let's rock and roll");
   Serial.println(" ");
+  OldHour = Hour;
+  OldMinute = Minute;
 
 } //setup()
 
@@ -339,30 +375,42 @@ void setup() {
 */
 
 void loop() {
-  
-  EVERY_N_SECONDS(1){
-    if (useLDR){                                        // If we have a LDR, we can here 'read' the amount of light and adjust the overall brightness
-   //  Serial.println(analogRead(sensorPin));
+
+  // TimeChange animation
+  if (Minute == OldMinute && Hour == OldHour) {
+  } else {
+    //Serial.println("Animation time ");
+    if (animatechange == "Yes") {
+      timeChangeAnimation = true;
+    } else {
+      OldHour = Hour;
+      OldMinute = Minute;
+    }
+  }
+
+  EVERY_N_SECONDS(1) {
+    if (useLDR) {                                       // If we have a LDR, we can here 'read' the amount of light and adjust the overall brightness
+      //  Serial.println(analogRead(sensorPin));
       int MeasuredValue = analogRead(sensorPin);
-      if (MeasuredValue > 4000){
-          ledClockBrightNess = overAllBrightness;
+      if (MeasuredValue > 4000) {
+        ledClockBrightNess = overAllBrightness;
       }
-      else if(MeasuredValue > 3000 && MeasuredValue <= 4000){
-          ledClockBrightNess = overAllBrightness * 3 / 4;
+      else if (MeasuredValue > 3000 && MeasuredValue <= 4000) {
+        ledClockBrightNess = overAllBrightness * 3 / 4;
       }
-      else if (MeasuredValue > 2000 && MeasuredValue <= 3000){
-          ledClockBrightNess = overAllBrightness / 2;
+      else if (MeasuredValue > 2000 && MeasuredValue <= 3000) {
+        ledClockBrightNess = overAllBrightness / 2;
       }
-      else if (MeasuredValue > 1000 && MeasuredValue <= 2000){
-          ledClockBrightNess = overAllBrightness / 4;
+      else if (MeasuredValue > 1000 && MeasuredValue <= 2000) {
+        ledClockBrightNess = overAllBrightness / 4;
       }
-       else if (MeasuredValue >= 0 && MeasuredValue <= 1000){
-          ledClockBrightNess = overAllBrightness / 5;
+      else if (MeasuredValue >= 0 && MeasuredValue <= 1000) {
+        ledClockBrightNess = overAllBrightness / 5;
       }
-     //ledClockBrightNess = overAllBrightness;
-   }else{
-     ledClockBrightNess = overAllBrightness;
-   }
+      //ledClockBrightNess = overAllBrightness;
+    } else {
+      ledClockBrightNess = overAllBrightness;
+    }
   }
 
   String activity = whichFX;                          // Default animation
@@ -479,7 +527,7 @@ void loop() {
       useOld = false;
     }
 
-//    timeMatrix = getTimeMatrix("none", digitColor);
+    //    timeMatrix = getTimeMatrix("none", digitColor);
 
     if (activity == "dotsBeat") {
       timeMatrix = getTimeMatrix(digitAnimation, digitColor);
@@ -605,12 +653,12 @@ void loop() {
       String minuten = String(Minute);
 
       EVERY_N_SECONDS(60) {
-        weatherJSON = getTheWeather(endpoint, apikey, city, units);        
+        weatherJSON = getTheWeather(endpoint, apikey, city, units);
         tempOutside = returnFromJSON(weatherJSON, "main", "temp");
-     
+
         maxtempOutside = returnFromJSON(weatherJSON, "main", "temp_max");
         mintempOutside = returnFromJSON(weatherJSON, "main", "temp_min");
-        
+
         textForDisplay = " " + tempOutside + "'C" + " ^" + maxtempOutside + "'C %" + mintempOutside + "'C";
         minuten = String(Minute);
       }
@@ -629,7 +677,7 @@ void loop() {
         if (textScroller >= textlength * 7) {
           textScroller = -34;
         }
-       // timeMatrix.clear();
+        // timeMatrix.clear();
         timeMatrix = showText(textForDisplay, digitColor, textScroller);
         bgMatrix = getBackgroundMap(timeMatrix);
         bgMatrix = oneColorBackground(bgMatrix, backgroundColor);         // And we will give it a black background.
@@ -739,7 +787,7 @@ void loop() {
       }
     }
     else if (digitActivity == "No animation") {
-     // timeMatrix = recolorDigits(timeMatrix, digitColor);
+      // timeMatrix = recolorDigits(timeMatrix, digitColor);
       fgToBlack = false;
     }
     else if (digitActivity == "Dark digits") {

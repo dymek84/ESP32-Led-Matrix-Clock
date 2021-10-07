@@ -142,7 +142,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   <!-- Tab content -->
   
   <div id="Animation" class="tabcontent">
-    <h3>London</h3>
+    <h3>Animation</h3>
      <form action="/get" target="hidden-form">
     Choose your background animation. The current effect: - %effect% <br />
       <select name="effect" id="effecten" onchange="this.form.submit()">
@@ -197,7 +197,15 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     <option value="Sweep">Sweep</option>
     </select>
   </form><br />
-  
+
+  <form action="/get" target="hidden-form">
+   Animate minute and hour change:  <br />
+    <select name="animatechange" id="%animatechange%" onchange="this.form.submit()">
+    <option value="%animatechange%" selected> %animatechange% </option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+     </select>
+  </form><br />
   <form action="/get" target="hidden-form">
     <label for="colorpicker1">Digit color: </label> <br />
     <input type="color" id="colorpicker1" name="inputDigitCol" value ="%digitHTMLcol%">
@@ -361,6 +369,30 @@ The nightmode can also be set to start and end between certain times.
         <input type="text" id="city" name="city" value ="%city%">
         <input type="submit" value="Submit" >
       </form> <br />
+      <br />
+      <h3> Clock setting </h3>
+      Change the data output pin on ESP32 to communicatie with the LEDmatrix (restart required): 
+
+ <form action="/get" target="hidden-form">
+   LED pin: <br />
+    <select name="ledpin" id="ledpin" onchange="this.form.submit()">
+      <option value="%ledpin%" selected> %ledpin% </option>
+        <option value="2">2</option>
+        <option value="12">12</option>
+        <option value="18">18</option>  
+        </select>
+        </form>
+<br />
+      
+ 
+      LDR (light dependent resisor) PIN (set to zero (0) to disable LDR:
+       <form action="/get" target="hidden-form">
+        LDR pin: <br />
+         <input type="text" id="ldrpin" name="ldrpin" value ="%ldrpin%">
+        <input type="submit" value="Submit" >
+      </form> <br />
+      <br />
+        
    </div>   
   
     <iframe style="display:none" name="hidden-form"></iframe>
