@@ -32,15 +32,21 @@ I used a lot of global variables. Some lineair thinking and ugly if loops. And w
 - Use the Arduino programming environment and make sure to Add the ESP32 to your libraries and boards, see tutorial: https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/
 - You can import my sketch in this environment. If correct, all files should be in there!! Don't change the file names (and yes, I used numbering and some numbers my be missing, this is deliberary a I might want to add stuff later on..) The order is important!! All files should be in TABS in the arduino project onces it is opened. 
 - I have used a lot of libraties: Make sure you have them all installed in the arduino environment:
-#include <FastLED.h> // https://github.com/FastLED/FastLED
-#include <WiFi.h> //already in arduino after installing the ESP32 environment
-#include "time.h" //already in arduino 
-#include <String> //already in arduino after installing the ESP32 environment
-#include <AsyncTCP.h> // https://github.com/me-no-dev/AsyncTCP
-#include <ESPAsyncWebServer.h> // https://github.com/me-no-dev/ESPAsyncWebServer
-#include "soc/soc.h" //already in arduino after installing the ESP32 environment
-#include "soc/rtc_cntl_reg.h" //already in arduino after installing the ESP32 environmen
-#include <Preferences.h>  // works much better than spiffs...to store parameters persistently during reboots.
+#include <FastLED.h>                                  // No animations without this library
+#include <WiFi.h>                                     // No wifi without this library
+#include "Time.h"                                     // And how about the time.. no idea what time it is without this library
+#include <String>
+#include <AsyncTCP.h>                                 // Webserver stuff
+#include <ESPAsyncWebServer.h>                        // More webserver stuff
+#include <HTTPClient.h>                               // Needed to get some information from the internetz.. .like weather data  
+#include <AsyncElegantOTA.h>                          // A library to allow Over The Air Updates :)
+#include <Arduino_JSON.h>                             // Often this data comes as JSON :)
+#include "soc/soc.h"                                  // Used to make taksk on diferent cores
+#include "soc/rtc_cntl_reg.h"
+#include <Preferences.h>                              // Store the prefences in permanent memory in a much easier way than SPIFFS
+#include "HTML.h"                                     // A library containing the HTML pages (included with this project)
+#include "MatrixDefs.h"                               // A library containing the arrays with matrix defenitions, eg xy positions etc. IMPORTANT as
+#include <map>                                        // We will use hashmaps to store Led position and color data
   
 Issues I have encountered on my Mac (OSX 11.2.1) when trying to compile in arduino are...:
 - Almost after every OSX update I get error messages that compiling is not possible: Run this in the terminal --> sudo xcode-select --install
@@ -82,6 +88,7 @@ There are so many things I want to do. But for now this is my action list.
 - IMPLEMENTED: a more simple method to animate background and foreground without them inteferring..(most of the time).
 - IMPLEMENTED: Light Dependent Resistor input to automticallt accomodate the brightness of the matrix to the ambient brightness
 - IMPLEMENTED: New animation. Now when a minute or hour has passed the corresponding digit scrolls down and is replaced by a new digit.
+- Added Over The Air (OTA) update capability.. go to the clock settings webpage http://yourclock.ip.address/update/ and upload a pre compiles binary
  
 
 -- ISSUE (or not): When background is fade-down, some animations will not look as good. As a fix some background cannot be faded (even if you set it to fade) the only dimming that will always work is the overall brightness (dimming). 
