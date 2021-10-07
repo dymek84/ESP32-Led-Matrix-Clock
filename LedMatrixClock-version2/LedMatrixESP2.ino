@@ -17,7 +17,8 @@
 #include <String>
 #include <AsyncTCP.h>                                 // Webserver stuff
 #include <ESPAsyncWebServer.h>                        // More webserver stuff
-#include <HTTPClient.h>                               // Needed to get some information from the internetz.. .like weather data   
+#include <HTTPClient.h>                               // Needed to get some information from the internetz.. .like weather data  
+#include <AsyncElegantOTA.h>                          // A library to allow Over The Air Updates :)
 #include <Arduino_JSON.h>                             // Often this data comes as JSON :)
 #include "soc/soc.h"                                  // Used to make taksk on diferent cores
 #include "soc/rtc_cntl_reg.h"

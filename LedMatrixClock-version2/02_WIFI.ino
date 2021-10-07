@@ -419,9 +419,10 @@ void RunWebserver( void * parameter) {
   });
 
   server.onNotFound(notFound);
+  AsyncElegantOTA.begin(&server);    // Start ElegantOTA
   server.begin();
 
   for (;;) {
-
+    AsyncElegantOTA.loop();
   }
 }
