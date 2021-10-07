@@ -331,25 +331,7 @@ The nightmode can also be set to start and end between certain times.
      <br />Between %nightTimeHour%:%nightTimeMinute% in the evening and %morningTimeHour%:%morningTimeMinute%  in the morning<br />
      the clock will be in nightmode. <br />
       <br />
-      <form action="/get" target="hidden-form">
-      Put a message here, this can be displayed: <br />
-        <input type="text" id="scrolltext" name="scrolltext" value ="%scrolltext%" maxlength="20">
-        <input type="submit" value="Submit" >
-      </form>
-      <form action="/get" target="hidden-form">
-     <p> Text Scroll speed (needs a reboot after you set a new speed): <br />
-     <div class="slidecontainer">
-        <input name="scrollspeed" type="range" min="1" max="255" value="%scrollspeed%" class="slider" id="digitBrightness"  onchange="this.form.submit()">
-        Value: %scrollspeed% 
-      </div>
-     </form>
-     </p>
-     <form action="/get" target="hidden-form">
- You can click this button to restart the Clock. <br />
-  <input type="submit" name="restart" value="Restart clock" onclick="submitMessage()">
-  <br />
-  </form>
-  <br />
+     
 </div>
   
   <div id="Other" class="tabcontent">
@@ -392,6 +374,30 @@ The nightmode can also be set to start and end between certain times.
         <input type="submit" value="Submit" >
       </form> <br />
       <br />
+
+    <h3> Text to display on matrix</h3>
+     <form action="/get" target="hidden-form">
+      Put a message here, this can be displayed: <br />
+        <input type="text" id="scrolltext" name="scrolltext" value ="%scrolltext%" maxlength="20">
+        <input type="submit" value="Submit" >
+      </form>
+      <form action="/get" target="hidden-form">
+     <p> Text Scroll speed (needs a reboot after you set a new speed): <br />
+     <div class="slidecontainer">
+        <input name="scrollspeed" type="range" min="1" max="255" value="%scrollspeed%" class="slider" id="digitBrightness"  onchange="this.form.submit()">
+        Value: %scrollspeed% 
+      </div>
+     </form>
+     </p>
+
+         <h3> Reboot </h3>
+     <form action="/get" target="hidden-form">
+ You can click this button to restart the Clock. <br />
+  <input type="submit" name="restart" value="Restart clock" onclick="submitMessage()">
+  <br />
+  </form>
+  <br />
+
         
    </div>   
   
