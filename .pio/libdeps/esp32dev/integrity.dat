@@ -1,0 +1,9 @@
+TimeAlarms
+FastLED
+Arduino_JSON
+ElegantOTA
+HTTPClient
+Time
+esphome/ESPAsyncWebServer-esphome @ ^3.1.0
+Preferences
+AsyncTCP
