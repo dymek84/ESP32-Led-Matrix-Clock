@@ -71,10 +71,10 @@ void showCharacter(int *letter, int locationCursor, CRGB color, int digitBrightn
             locationOnMatrix = xyToLedNumber(x + locationCursor - XRES , y);
           }
           // check if pixel is below xres of 0, if so remap to end of display.
-          // leds[locationOnMatrix] = CHSV(hue, 255, 128);
-          leds[locationOnMatrix] = color;
-          // leds[locationOnMatrix].fadeToBlackBy( digitBrightness );
-          leds[locationOnMatrix].fadeLightBy( digitBrightness );
+          // matrix[locationOnMatrix] = CHSV(hue, 255, 128);
+          matrix[locationOnMatrix] = color;
+          // matrix[locationOnMatrix].fadeToBlackBy( digitBrightness );
+          matrix[locationOnMatrix].fadeLightBy( digitBrightness );
         }
       }
     }
@@ -91,42 +91,42 @@ void showDots(CRGB color, int second, int digitBrightness) {
   } else {
     color = CHSV(0, 0, 0);
   }
-  leds[xyToLedNumber(15, 1)] = color;
-  // leds[xyToLedNumber(15, 1)].fadeToBlackBy( digitBrightness );
-  leds[xyToLedNumber(15, 1)].fadeLightBy( digitBrightness );
+  matrix[xyToLedNumber(15, 1)] = color;
+  // matrix[xyToLedNumber(15, 1)].fadeToBlackBy( digitBrightness );
+  matrix[xyToLedNumber(15, 1)].fadeLightBy( digitBrightness );
 
-  leds[xyToLedNumber(16, 1)] = color;
-  // leds[xyToLedNumber(16, 1)].fadeToBlackBy( digitBrightness );
-  leds[xyToLedNumber(16, 1)].fadeLightBy( digitBrightness );
-
-
-  leds[xyToLedNumber(15, 2)] = color;
-  //  leds[xyToLedNumber(15, 2)].fadeToBlackBy( digitBrightness );
-  leds[xyToLedNumber(15, 2)].fadeLightBy( digitBrightness );
+  matrix[xyToLedNumber(16, 1)] = color;
+  // matrix[xyToLedNumber(16, 1)].fadeToBlackBy( digitBrightness );
+  matrix[xyToLedNumber(16, 1)].fadeLightBy( digitBrightness );
 
 
-  leds[xyToLedNumber(16, 2)] = color;
-  // leds[xyToLedNumber(16, 2)].fadeToBlackBy( digitBrightness );
-  leds[xyToLedNumber(16, 2)].fadeLightBy( digitBrightness );
+  matrix[xyToLedNumber(15, 2)] = color;
+  //  matrix[xyToLedNumber(15, 2)].fadeToBlackBy( digitBrightness );
+  matrix[xyToLedNumber(15, 2)].fadeLightBy( digitBrightness );
 
 
-  leds[xyToLedNumber(15, 5)] = color;
-  // leds[xyToLedNumber(15, 5)].fadeToBlackBy( digitBrightness );
-  leds[xyToLedNumber(15, 5)].fadeLightBy( digitBrightness );
+  matrix[xyToLedNumber(16, 2)] = color;
+  // matrix[xyToLedNumber(16, 2)].fadeToBlackBy( digitBrightness );
+  matrix[xyToLedNumber(16, 2)].fadeLightBy( digitBrightness );
 
 
-  leds[xyToLedNumber(16, 5)] = color;
-  // leds[xyToLedNumber(16, 5)].fadeToBlackBy( digitBrightness );
-  leds[xyToLedNumber(16, 5)].fadeLightBy( digitBrightness );
-
-  leds[xyToLedNumber(15, 6)] = color;
-  // leds[xyToLedNumber(15, 6)].fadeToBlackBy( digitBrightness );
-  leds[xyToLedNumber(15, 6)].fadeLightBy( digitBrightness );
+  matrix[xyToLedNumber(15, 5)] = color;
+  // matrix[xyToLedNumber(15, 5)].fadeToBlackBy( digitBrightness );
+  matrix[xyToLedNumber(15, 5)].fadeLightBy( digitBrightness );
 
 
-  leds[xyToLedNumber(16, 6)] = color;
-  // leds[xyToLedNumber(16, 6)].fadeToBlackBy( digitBrightness );
-  leds[xyToLedNumber(16, 6)].fadeLightBy( digitBrightness );
+  matrix[xyToLedNumber(16, 5)] = color;
+  // matrix[xyToLedNumber(16, 5)].fadeToBlackBy( digitBrightness );
+  matrix[xyToLedNumber(16, 5)].fadeLightBy( digitBrightness );
+
+  matrix[xyToLedNumber(15, 6)] = color;
+  // matrix[xyToLedNumber(15, 6)].fadeToBlackBy( digitBrightness );
+  matrix[xyToLedNumber(15, 6)].fadeLightBy( digitBrightness );
+
+
+  matrix[xyToLedNumber(16, 6)] = color;
+  // matrix[xyToLedNumber(16, 6)].fadeToBlackBy( digitBrightness );
+  matrix[xyToLedNumber(16, 6)].fadeLightBy( digitBrightness );
 
 }
 //time function to get the local time from the NTP server
@@ -136,7 +136,7 @@ void updateLocalTime()
   //struct tm timeinfo;
   while (!getLocalTime(&timeinfo) && retryCounter < 6 ) {
     Serial.println("Failed to obtain time.. try again in 3 seconds");
-    leds[16] = CRGB::Orange;
+    matrix[16] = CRGB::Orange;
     FastLED.show();
     FastLED.delay(3000);
     retryCounter++;

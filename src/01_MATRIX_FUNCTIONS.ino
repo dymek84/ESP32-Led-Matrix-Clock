@@ -120,7 +120,7 @@ std::map<int, CRGB> getBackgroundMap(std::map<int, CRGB> digitMap ) {
 std::map<int, CRGB> makeBgMap(int matrixSize) {
   std::map<int, CRGB> mmap;
   for (int i = 0; i < matrixSize; i++) {
-    mmap[i] = leds[i];
+    mmap[i] = matrix[i];
   }
   return mmap;
 }
@@ -140,31 +140,31 @@ CRGB getCRGBNumber(int lednr, std::map<int, CRGB> matrix) {
 
 /*
    A function to merge the maps to display on the matrix.
-   It takes both the background and foreground maps, and maps it to the leds[] array
+   It takes both the background and foreground maps, and maps it to the matrix[] array
 */
 void mergeMapsToLeds(std::map<int, CRGB> bg, std::map<int, CRGB> fg, int bgbrightness, int fgbrightness, boolean bgtoBlack = false, boolean fgtoBlack = false) {
 
   if (!fgtoBlack) {
     for (auto const& t : fg) {
-      leds[t.first] = t.second;
-      leds[t.first].fadeLightBy( fgbrightness );
+      matrix[t.first] = t.second;
+      matrix[t.first].fadeLightBy( fgbrightness );
     }
   } else {
     for (auto const& t : fg) {
-      leds[t.first] = t.second;
-      leds[t.first].fadeToBlackBy( fgbrightness );
+      matrix[t.first] = t.second;
+      matrix[t.first].fadeToBlackBy( fgbrightness );
     }
   }
 
   if (!bgtoBlack) {
     for (auto const& t : bg) {
-      leds[t.first] = t.second;
-      leds[t.first].fadeLightBy( bgbrightness );
+      matrix[t.first] = t.second;
+      matrix[t.first].fadeLightBy( bgbrightness );
     }
   } else {
     for (auto const& t : bg) {
-      leds[t.first] = t.second;
-      leds[t.first].fadeToBlackBy( bgbrightness );
+      matrix[t.first] = t.second;
+      matrix[t.first].fadeToBlackBy( bgbrightness );
     }
   }
 } // mergeMapsToLeds()
@@ -197,12 +197,12 @@ std::map<int, CRGB> makeDigits(int *letter, std::map<int, CRGB> digits, int x = 
             int locationOnMatrix = xyToLedNumber(dx + x, dy + y);
             if (digits.find(locationOnMatrix) == digits.end()) {
               if (useOld) {
-                digits[locationOnMatrix] = leds[locationOnMatrix];                // new LED, give it a default color.
+                digits[locationOnMatrix] = matrix[locationOnMatrix];                // new LED, give it a default color.
               } else {
                 digits[locationOnMatrix] = digitColor;
               }
             } else {
-              digits[locationOnMatrix] = leds[locationOnMatrix];     // LED already exists.. leave it.
+              digits[locationOnMatrix] = matrix[locationOnMatrix];     // LED already exists.. leave it.
             } // led already in map
           } // LED should be displayed
         } //LED is on matrix

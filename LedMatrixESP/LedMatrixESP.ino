@@ -356,7 +356,7 @@ const char* PARAM_DIGITBRIGHTNESS = "digitBrightness";
     any setup of leds. ZigZag, Or Left to right, right to left, up/down or combination of multiple matrices.
 
 */
-CRGB leds[NUM_LEDS];
+CRGB matrix[NUM_LEDS];
 
 
 const int ledArray[XRES * YRES] = // the order of led-id's in this case every row is left to right.

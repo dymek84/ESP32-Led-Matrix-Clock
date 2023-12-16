@@ -28,10 +28,10 @@ void showStrip() {
 
 void setPixel(int Pixel, byte red, byte green, byte blue) {
   // FastLED
-  leds[Pixel].r = red;
-  leds[Pixel].g = green;
-  leds[Pixel].b = blue;
-  // leds[Pixel].fadeToBlackBy( 128 );
+  matrix[Pixel].r = red;
+  matrix[Pixel].g = green;
+  matrix[Pixel].b = blue;
+  // matrix[Pixel].fadeToBlackBy( 128 );
 }
 
 void setAll(byte red, byte green, byte blue) {
@@ -48,8 +48,8 @@ void oneColorBackground(CRGB color, int bgBrightness) {
   //  set background color
   for (int y = 0; y < YRES; y++) {
     for (int x = 0; x < XRES; x++) {
-      leds[xyToLedNumber(x, y)] = color;
-      leds[xyToLedNumber(x, y)].fadeToBlackBy( bgBrightness );
+      matrix[xyToLedNumber(x, y)] = color;
+      matrix[xyToLedNumber(x, y)].fadeToBlackBy( bgBrightness );
     }
   }
   showStrip();
@@ -516,7 +516,7 @@ void fadeToBlack(int ledNo, byte fadeValue) {
 #endif
 #ifndef ADAFRUIT_NEOPIXEL_H
   // FastLED
-  leds[ledNo].fadeToBlackBy( fadeValue );
+  matrix[ledNo].fadeToBlackBy( fadeValue );
 #endif
 }
 
@@ -530,7 +530,7 @@ void confetti() {
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy(leds, NUM_LEDS, thisfade);                    // Low values = slower fade.
   int pos = random16(NUM_LEDS);                               // Pick an LED at random.
-  leds[pos] += CHSV((thishue + random16(huediff)) / 4 , thissat, thisbri); // I use 12 bits for hue so that the hue increment isn't too quick.
+  matrix[pos] += CHSV((thishue + random16(huediff)) / 4 , thissat, thisbri); // I use 12 bits for hue so that the hue increment isn't too quick.
   thishue = thishue + thisinc;                                // It increments here.
 
   backgroundBrightness = tempbackground;
@@ -559,7 +559,7 @@ void plasma() {                                                 // This is the h
     int colorIndex = cubicwave8((k * 23) + thisPhase) / 2 + cos8((k * 15) + thatPhase) / 2; // Create a wave and add a phase change and add another wave with its own phase change.. Hey, you can even change the frequencies if you wish.
     int thisBright = qsuba(colorIndex, beatsin8(7, 0, 96));                               // qsub gives it a bit of 'black' dead space by setting sets a minimum value. If colorIndex < current value of beatsin8(), then bright = 0. Otherwise, bright = colorIndex..
 
-    leds[k] = ColorFromPalette(currentPalette, colorIndex, thisBright, currentBlending);  // Let's now add the foreground colour.
+    matrix[k] = ColorFromPalette(currentPalette, colorIndex, thisBright, currentBlending);  // Let's now add the foreground colour.
   }
 }
 
@@ -575,7 +575,7 @@ void rippless() {
 
   for (int i = 0; i < maxRipples; i++) {                                          // Move the ripple if it exists
     if (ripples[i].exist) {
-      leds[ripples[i].pos] = ColorFromPalette(currentPalette, ripples[i].color, ripples[i].brightness, LINEARBLEND);
+      matrix[ripples[i].pos] = ColorFromPalette(currentPalette, ripples[i].color, ripples[i].brightness, LINEARBLEND);
       ripples[i].Move();
     }
   }
@@ -605,7 +605,7 @@ void beatwave() {
   uint8_t wave4 = beatsin8(6, 0, 255);
 
   for (int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = ColorFromPalette( currentPalette, i + wave1 + wave2 + wave3 + wave4, 255, currentBlending);
+    matrix[i] = ColorFromPalette( currentPalette, i + wave1 + wave2 + wave3 + wave4, 255, currentBlending);
   }
 
 } // beatwave()
@@ -617,10 +617,10 @@ void dot_beat() {
   uint8_t outer = beatsin8(bpm, 0, NUM_LEDS - 1);             // Move entire length
   uint8_t middle = beatsin8(bpm, NUM_LEDS / 3, NUM_LEDS / 3 * 2); // Move 1/3 to 2/3
 
-  leds[middle] = CRGB::Purple;
-  leds[inner] = CRGB::Blue;
-  leds[outer] = CRGB::Aqua;
+  matrix[middle] = CRGB::Purple;
+  matrix[inner] = CRGB::Blue;
+  matrix[outer] = CRGB::Aqua;
 
-  nscale8(leds, NUM_LEDS, fadeval);                           // Fade the entire array. Or for just a few LED's, use  nscale8(&leds[2], 5, fadeval);
+  nscale8(leds, NUM_LEDS, fadeval);                           // Fade the entire array. Or for just a few LED's, use  nscale8(&matrix[2], 5, fadeval);
 
 } // dot_beat()

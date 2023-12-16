@@ -21,14 +21,14 @@ void connectToNetwork() {
   String wifistation = readFile(SPIFFS, "/inputWifi.txt"); // no idea.. but without this line it doesnt work... weird
   Serial.println(wifistation);
   int netWorkTrys = 0;
-  leds[0] = CRGB (0, 10, 20);
+  matrix[0] = CRGB (0, 10, 20);
   FastLED.show();
   int ledOn = 1;
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED ) { // a max try should be specified
     delay(2000);
-    leds[ledOn] = CRGB (0, 10, 20);
+    matrix[ledOn] = CRGB (0, 10, 20);
     Serial.println("Establishing connection to WiFi..");
     ledOn ++;
     FastLED.show();
@@ -49,7 +49,7 @@ void connectToNetwork() {
     }
     netWorkTrys++;
   }
-  leds[0] = CRGB::Green;
+  matrix[0] = CRGB::Green;
   Serial.println("Connected to network");
   showIPonLED();
   FastLED.show();

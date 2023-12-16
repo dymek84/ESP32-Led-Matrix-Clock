@@ -1,14 +1,14 @@
-Update
 HTTPClient
-Arduino_JSON
-Preferences
-https://github.com/mobizt/ESP-Google-Sheet-Client.git
-FastLED
-TimeAlarms
-WiFi
-Time
-ElegantOTA
-esphome/ESPAsyncWebServer-esphome @ ^3.1.0
 FS
-esphome/AsyncTCP-esphome @ ^2.0.1
+Update
+SPIFFS
+WiFi
+esphome/ESPAsyncWebServer-esphome @ ^3.1.0
+TimeAlarms
+ElegantOTA
+Preferences
+FastLED
+Time
 WiFiClientSecure
+esphome/AsyncTCP-esphome @ ^2.0.1
+Arduino_JSON

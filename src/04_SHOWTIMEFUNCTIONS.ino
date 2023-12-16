@@ -10,7 +10,7 @@ boolean updateLocalTime()
   //struct tm timeinfo;
   while (!getLocalTime(&timeinfo) && retryCounter < 6 ) {
     Serial.println("Failed to obtain time.. try again in 3 seconds");
-    leds[16] = CRGB::Orange;
+    matrix[16] = CRGB::Orange;
     FastLED.show();
     FastLED.delay(3000);
     retryCounter++;
